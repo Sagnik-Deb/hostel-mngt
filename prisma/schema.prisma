@@ -1,0 +1,303 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ─────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  ADMIN
+  PRIMARY_ADMIN
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  PENDING_APPROVAL
+  ACTIVE
+  ON_LEAVE
+  CHECKED_OUT
+}
+
+enum AdminApprovalState {
+  PENDING
+  APPROVED
+  REVOKED
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVE
+  EXTENSION_REQUESTED
+  RETURN_REQUESTED
+  COMPLETED
+  CANCELLED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  LEAVE_REQUEST
+  LEAVE_APPROVED
+  LEAVE_REJECTED
+  LEAVE_REMINDER
+  LEAVE_EXTENSION
+  LEAVE_EXTENSION_APPROVED
+  LEAVE_EXTENSION_REJECTED
+  LEAVE_RETURN_REQUEST
+  LEAVE_RETURN_CONFIRMED
+  STUDENT_REGISTERED
+  STUDENT_APPROVED
+  STUDENT_REJECTED
+  COMPLAINT_CREATED
+  COMPLAINT_UPDATED
+  COMPLAINT_RESOLVED
+  ADMIN_PROMOTED
+  ADMIN_APPROVED
+  ADMIN_REVOKED
+  CHECKOUT_INITIATED
+  MESS_MENU_UPDATED
+  GENERAL
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  SNACKS
+  DINNER
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+// ─── MODELS ────────────────────────────────────────────────
+
+model Hostel {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  wardenName  String
+  wardenEmail String
+  wardenPhone String
+  address     String?
+  rules       String[]
+  imageUrl    String?
+  totalRooms  Int      @default(0)
+  capacity    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rooms        Room[]
+  users        User[]
+  applications Application[]
+  complaints   Complaint[]
+  messMenus    MessMenu[]
+  pastStudents PastStudent[]
+
+  @@map("hostels")
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  number    String
+  floor     Int
+  capacity  Int      @default(3)
+  occupied  Int      @default(0)
+  roomType  String   @default("Triple Sharing")
+  hostelId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hostel    Hostel @relation(fields: [hostelId], references: [id])
+  occupants User[]
+
+  @@unique([hostelId, number])
+  @@map("rooms")
+}
+
+model User {
+  id            String             @id @default(cuid())
+  email         String             @unique
+  password      String
+  name          String
+  phone         String?
+  aadharNumber  String?
+  collegeId     String?
+  role          Role               @default(STUDENT)
+  status        UserStatus         @default(ACTIVE)
+  adminState    AdminApprovalState @default(APPROVED)
+  hostelId      String
+  roomId        String?
+  bedNumber     Int?
+  profileImage  String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  hostel        Hostel         @relation(fields: [hostelId], references: [id])
+  room          Room?          @relation(fields: [roomId], references: [id])
+  leaveRequests LeaveRequest[]
+  notifications Notification[]
+  complaints    Complaint[]    @relation("complainant")
+  messRatings   MessRating[]
+
+  @@map("users")
+}
+
+model Application {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  password              String
+  name                  String
+  phone                 String?
+  aadharNumber          String?
+  collegeIdUpload       String?
+  hostelId              String
+  emailVerified         Boolean  @default(false)
+  roommatePreference    String?
+  roommateQuestionnaire Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  hostel Hostel @relation(fields: [hostelId], references: [id])
+
+  @@map("applications")
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}
+
+model LeaveRequest {
+  id             String      @id @default(cuid())
+  userId         String
+  reason         String
+  startDate      DateTime
+  endDate        DateTime
+  originalEnd    DateTime?
+  extensionReason String?
+  returnReason   String?
+  status         LeaveStatus @default(PENDING)
+  adminNotes     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("leave_requests")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType @default(GENERAL)
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model Complaint {
+  id          String            @id @default(cuid())
+  userId      String
+  hostelId    String
+  subject     String
+  description String
+  category    String?
+  priority    ComplaintPriority  @default(MEDIUM)
+  status      ComplaintStatus    @default(OPEN)
+  response    String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user   User   @relation("complainant", fields: [userId], references: [id])
+  hostel Hostel @relation(fields: [hostelId], references: [id])
+
+  @@map("complaints")
+}
+
+model MessMenu {
+  id        String    @id @default(cuid())
+  hostelId  String
+  day       DayOfWeek
+  mealType  MealType
+  items     String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  hostel  Hostel       @relation(fields: [hostelId], references: [id])
+  ratings MessRating[]
+
+  @@unique([hostelId, day, mealType])
+  @@map("mess_menus")
+}
+
+model MessRating {
+  id        String   @id @default(cuid())
+  userId    String
+  menuId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id])
+  menu MessMenu @relation(fields: [menuId], references: [id])
+
+  @@unique([userId, menuId])
+  @@map("mess_ratings")
+}
+
+model PastStudent {
+  id           String   @id @default(cuid())
+  originalId   String
+  email        String
+  name         String
+  phone        String?
+  aadharNumber String?
+  collegeId    String?
+  hostelId     String
+  roomNumber   String?
+  joinedAt     DateTime
+  checkedOutAt DateTime @default(now())
+  checkedOutBy String?
+
+  hostel Hostel @relation(fields: [hostelId], references: [id])
+
+  @@map("past_students")
+}
