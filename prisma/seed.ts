@@ -75,6 +75,27 @@ async function main() {
     }
 
     console.log(`🚪 Created rooms for ${hostel.name}`);
+
+    // Create Admin for the hostel
+    const adminEmail = process.env[`ADMIN_${hostelData.code}_EMAIL`];
+    const adminPassword = process.env[`ADMIN_${hostelData.code}_PASSWORD`];
+
+    if (adminEmail && adminPassword) {
+      const hashedAdminPassword = await bcrypt.hash(adminPassword, 12);
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          password: hashedAdminPassword,
+          name: `${hostelData.name} Admin`,
+          role: "ADMIN",
+          status: "ACTIVE",
+          adminState: "APPROVED",
+          hostelId: hostel.id,
+          phone: "+91-9999999998",
+        },
+      });
+      console.log(`👤 Created admin for ${hostel.name}: ${adminEmail}`);
+    }
   }
 
   // Create Primary Admin

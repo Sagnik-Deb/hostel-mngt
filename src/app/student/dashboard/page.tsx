@@ -5,7 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 export default function StudentDashboard() {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [leaveStatus, setLeaveStatus] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -30,6 +31,40 @@ export default function StudentDashboard() {
       .then((d) => { if (d.success) setUnreadCount(d.data.unreadCount); })
       .catch(console.error);
   }, [token]);
+
+  const handleSelfCheckout = async () => {
+    const confirmed = confirm(
+      "⚠ PERMANENT CHECKOUT WARNING ⚠\n\n" +
+      "This action is IRREVERSIBLE. Your account will be deleted and you will be archived as a past student. " +
+      "You will NOT be able to log in again.\n\n" +
+      "Are you absolutely sure you want to proceed?"
+    );
+
+    if (!confirmed) return;
+
+    setIsCheckingOut(true);
+    try {
+      const resp = await fetch("/api/student/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await resp.json();
+      if (data.success) {
+        alert(data.message);
+        logout();
+      } else {
+        alert(data.error || "Checkout failed");
+      }
+    } catch (err) {
+      alert("An error occurred during checkout");
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -84,7 +119,14 @@ export default function StudentDashboard() {
           <Link href="/student/leave" className="btn btn-secondary text-center">✈️ Apply Leave</Link>
           <Link href="/student/complaints" className="btn btn-secondary text-center">📢 Raise Complaint</Link>
           <Link href="/student/mess-menu" className="btn btn-secondary text-center">🍽️ Rate Meal</Link>
-          <Link href="/student/my-room" className="btn btn-secondary text-center">🛏️ My Room</Link>
+          <button 
+            onClick={handleSelfCheckout}
+            disabled={isCheckingOut}
+            className="btn btn-secondary text-center"
+            style={{ color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.2)' }}
+          >
+            {isCheckingOut ? "Checking out..." : "🏠 Permanent Checkout"}
+          </button>
         </div>
       </div>
     </div>

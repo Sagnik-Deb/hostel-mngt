@@ -70,14 +70,10 @@ export async function POST(request: NextRequest) {
       message: "You have been permanently checked out of the hostel. Thank you for your stay.",
     });
 
-    // 5. Mark user as checked out (strip access)
-    await prisma.user.update({
+    // 5. Permanently delete user from active records
+    // Related data (Notifications, Leaves, etc.) are handled by cascade delete in schema
+    await prisma.user.delete({
       where: { id: student.id },
-      data: {
-        status: "CHECKED_OUT",
-        roomId: null,
-        bedNumber: null,
-      },
     });
 
     return NextResponse.json({

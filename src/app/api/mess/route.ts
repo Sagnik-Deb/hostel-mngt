@@ -69,7 +69,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, data: menu, message: "Menu updated" });
+    // Notify all students in the hostel
+    const students = await prisma.user.findMany({
+      where: {
+        hostelId: user.hostelId,
+        role: "STUDENT",
+        status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+
+    if (students.length > 0) {
+      await prisma.notification.createMany({
+        data: students.map((s) => ({
+          userId: s.id,
+          type: "MESS_MENU_UPDATED",
+          title: "🍽️ Mess Menu Updated",
+          message: `The ${mealType.toLowerCase()} menu for ${day} has been updated.`,
+          link: "/student/mess-menu",
+        })),
+      });
+    }
+
+    return NextResponse.json({ success: true, data: menu, message: "Menu updated and notifications sent" });
   } catch (error) {
     console.error("Mess menu update error:", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

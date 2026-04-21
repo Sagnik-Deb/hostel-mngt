@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (loginType === "admin") {
       if (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN") {
         return NextResponse.json(
-          { success: false, error: "This account does not have admin access" },
+          { success: false, error: "This is an admin portal. Student accounts cannot login here." },
           { status: 403 }
         );
       }
@@ -67,8 +67,16 @@ export async function POST(request: NextRequest) {
         );
       }
     } else {
-      // Student login - validate hostel binding
-      if (user.role === "STUDENT" && hostelId && user.hostelId !== hostelId) {
+      // Student login
+      if (user.role !== "STUDENT") {
+        return NextResponse.json(
+          { success: false, error: "This is a student portal. Admin accounts must use the Admin Login portal." },
+          { status: 403 }
+        );
+      }
+
+      // Validate hostel binding
+      if (hostelId && user.hostelId !== hostelId) {
         return NextResponse.json(
           { success: false, error: "You are not registered in this hostel" },
           { status: 403 }
