@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { notifyHostelAdmins } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,6 +53,15 @@ export async function POST(request: NextRequest) {
       where: { id: application.id },
       data: { emailVerified: true },
     });
+
+    // Notify admins about the new application
+    await notifyHostelAdmins(
+      application.hostelId,
+      "STUDENT_REGISTERED",
+      "New Application Received",
+      `A new application from ${application.name} has been verified and is pending approval.`,
+      "/admin/applications"
+    );
 
     return NextResponse.json({
       success: true,
