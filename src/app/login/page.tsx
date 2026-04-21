@@ -141,9 +141,15 @@ export default function LoginPage() {
 
           <p className="text-center text-sm" style={{ color: 'var(--color-text-muted)' }}>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
-              Register here
-            </Link>
+            {loginType === "admin" ? (
+              <Link href="/signup/admin" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
+                Register as Admin
+              </Link>
+            ) : (
+              <Link href="/signup" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
+                Register here
+              </Link>
+            )}
           </p>
         </form>
       </div>

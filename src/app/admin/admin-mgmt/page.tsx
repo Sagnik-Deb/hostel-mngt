@@ -65,22 +65,108 @@ export default function AdminMgmtPage() {
     );
   }
 
+  const pendingAdmins = admins.filter((a) => a.adminState === "PENDING");
+  const approvedAdmins = admins.filter((a) => a.adminState === "APPROVED" || a.role === "PRIMARY_ADMIN");
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-1">🛡️ Admin Management</h1>
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Manage admin access for this hostel</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">🛡️ Admin Management</h1>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Manage admin access for this hostel</p>
+        </div>
+        {pendingAdmins.length > 0 && (
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--color-warning)' }}
+          >
+            ⏳ {pendingAdmins.length} Pending Approval
+          </div>
+        )}
       </div>
 
-      {/* Current Admins */}
+      {/* Pending Admins (Needs Approval) */}
+      {pendingAdmins.length > 0 && (
+        <div className="glass p-5" style={{ borderLeft: '3px solid var(--color-warning)' }}>
+          <h2 className="font-bold mb-1 flex items-center gap-2">
+            <span>⏳ Pending Approval</span>
+            <span
+              className="px-2 py-0.5 rounded-full text-xs font-bold"
+              style={{ background: 'rgba(245,158,11,0.2)', color: 'var(--color-warning)' }}
+            >
+              {pendingAdmins.length}
+            </span>
+          </h2>
+          <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>
+            These admins have registered and verified their email. Approve to grant full access.
+          </p>
+          <div className="space-y-3">
+            {pendingAdmins.map((admin) => (
+              <div
+                key={admin.id}
+                className="glass p-4 flex items-center justify-between"
+                style={{ background: 'rgba(245,158,11,0.05)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                    style={{ background: 'var(--gradient-warm)' }}
+                  >
+                    {admin.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-medium">{admin.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{admin.email}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                      Registered {new Date(admin.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="badge badge-warning">PENDING</span>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleAction(admin.id, "approve")}
+                    disabled={actionLoading === admin.id}
+                    id={`approve-admin-${admin.id}`}
+                  >
+                    {actionLoading === admin.id ? "..." : "✓ Approve"}
+                  </button>
+                  {user?.role === "PRIMARY_ADMIN" && (
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => {
+                        if (confirm(`Reject and remove ${admin.name}'s admin application?`)) {
+                          handleAction(admin.id, "revoke");
+                        }
+                      }}
+                      disabled={actionLoading === admin.id}
+                    >
+                      ✕ Reject
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Current Approved Admins */}
       <div className="glass p-5">
         <h2 className="font-bold mb-4">Current Admins</h2>
         <div className="space-y-3">
-          {admins.map((admin) => (
+          {approvedAdmins.length === 0 && (
+            <p className="text-sm text-center py-4" style={{ color: 'var(--color-text-muted)' }}>No admins found</p>
+          )}
+          {approvedAdmins.map((admin) => (
             <div key={admin.id} className="glass p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold" style={{ background: admin.role === "PRIMARY_ADMIN" ? 'var(--gradient-warm)' : 'var(--gradient-aurora)' }}>
-                  {admin.name.charAt(0)}
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                  style={{ background: admin.role === "PRIMARY_ADMIN" ? 'var(--gradient-warm)' : 'var(--gradient-aurora)' }}
+                >
+                  {admin.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <p className="font-medium">{admin.name}</p>
@@ -88,18 +174,16 @@ export default function AdminMgmtPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`badge ${admin.role === "PRIMARY_ADMIN" ? "badge-danger" : admin.adminState === "PENDING" ? "badge-warning" : "badge-success"}`}>
-                  {admin.role === "PRIMARY_ADMIN" ? "Primary" : admin.adminState}
+                <span className={`badge ${admin.role === "PRIMARY_ADMIN" ? "badge-danger" : "badge-success"}`}>
+                  {admin.role === "PRIMARY_ADMIN" ? "Primary Admin" : "Admin"}
                 </span>
 
-                {admin.adminState === "PENDING" && (
-                  <button className="btn btn-success btn-sm" onClick={() => handleAction(admin.id, "approve")} disabled={actionLoading === admin.id}>
-                    Approve
-                  </button>
-                )}
-
                 {user?.role === "PRIMARY_ADMIN" && admin.role === "ADMIN" && admin.adminState === "APPROVED" && (
-                  <button className="btn btn-danger btn-sm" onClick={() => handleAction(admin.id, "revoke")} disabled={actionLoading === admin.id}>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleAction(admin.id, "revoke")}
+                    disabled={actionLoading === admin.id}
+                  >
                     Revoke
                   </button>
                 )}
@@ -109,7 +193,7 @@ export default function AdminMgmtPage() {
         </div>
       </div>
 
-      {/* Promote Student (Primary Admin only) */}
+      {/* Promote Student to Admin (Primary Admin only) */}
       {user?.role === "PRIMARY_ADMIN" && (
         <div className="glass p-5">
           <h2 className="font-bold mb-4">Promote Student to Admin</h2>
