@@ -9,6 +9,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    // Superadmin has no DB record — return empty notification set
+    if (user.userId === "superadmin" || user.role === "SUPER_ADMIN") {
+      return NextResponse.json({
+        success: true,
+        data: { notifications: [], total: 0, unreadCount: 0, page: 1, limit: 20 },
+      });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -45,6 +53,11 @@ export async function PATCH(request: NextRequest) {
     const user = getAuthUser(request);
     if (!user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Superadmin has no notifications in DB
+    if (user.userId === "superadmin" || user.role === "SUPER_ADMIN") {
+      return NextResponse.json({ success: true, message: "No notifications" });
     }
 
     const { notificationId, markAll } = await request.json();

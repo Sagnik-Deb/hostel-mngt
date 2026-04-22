@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN"))) {
+    if (!loading && (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN"))) {
       router.push("/login");
     }
   }, [user, loading, router]);
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN")) {
+  if (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN")) {
     return null;
   }
 

@@ -7,9 +7,11 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "STUDENT" | "ADMIN" | "PRIMARY_ADMIN";
+  role: "STUDENT" | "ADMIN" | "PRIMARY_ADMIN" | "SUPER_ADMIN";
   status: string;
   hostelId: string;
+  hostelName?: string;
+  hostelCode?: string;
   hostel?: { id: string; name: string; code: string };
   room?: { id: string; number: string; floor: number; roomType: string } | null;
   bedNumber?: number | null;
@@ -22,6 +24,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string, loginType: string, hostelId?: string) => Promise<void>;
+  superadminLogin: (email: string, password: string, hostelId: string) => Promise<void>;
   signup: (data: Record<string, unknown>) => Promise<{ applicationId: string; email: string }>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   logout: () => void;
@@ -80,11 +83,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(data.data.token);
     setUser(data.data.user);
 
-    if (data.data.user.role === "ADMIN" || data.data.user.role === "PRIMARY_ADMIN") {
+    if (data.data.user.role === "ADMIN" || data.data.user.role === "PRIMARY_ADMIN" || data.data.user.role === "SUPER_ADMIN") {
       router.push("/admin/dashboard");
     } else {
       router.push("/student/dashboard");
     }
+  };
+
+  const superadminLogin = async (email: string, password: string, hostelId: string) => {
+    const res = await fetch("/api/auth/superadmin-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, hostelId }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login failed");
+
+    localStorage.setItem("token", data.data.token);
+    setToken(data.data.token);
+    setUser(data.data.user);
+    router.push("/admin/dashboard");
   };
 
   const signup = async (formData: Record<string, unknown>) => {
@@ -122,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, signup, verifyEmail, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, superadminLogin, signup, verifyEmail, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,7 +8,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 export interface JWTPayload {
   userId: string;
   email: string;
-  role: string;
+  role: string; // "STUDENT" | "ADMIN" | "PRIMARY_ADMIN" | "SUPER_ADMIN"
   hostelId: string;
 }
 
@@ -62,7 +62,7 @@ export function requireAuth(request: NextRequest): JWTPayload {
 
 export function requireAdmin(request: NextRequest): JWTPayload {
   const user = requireAuth(request);
-  if (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN") {
+  if (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN") {
     throw new Error("Forbidden: Admin access required");
   }
   return user;
@@ -70,7 +70,7 @@ export function requireAdmin(request: NextRequest): JWTPayload {
 
 export function requirePrimaryAdmin(request: NextRequest): JWTPayload {
   const user = requireAuth(request);
-  if (user.role !== "PRIMARY_ADMIN") {
+  if (user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN") {
     throw new Error("Forbidden: Primary Admin access required");
   }
   return user;

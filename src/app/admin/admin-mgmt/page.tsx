@@ -178,7 +178,7 @@ export default function AdminMgmtPage() {
                   {admin.role === "PRIMARY_ADMIN" ? "Primary Admin" : "Admin"}
                 </span>
 
-                {user?.role === "PRIMARY_ADMIN" && admin.role === "ADMIN" && admin.adminState === "APPROVED" && (
+                {(user?.role === "PRIMARY_ADMIN" || user?.role === "SUPER_ADMIN") && admin.role === "ADMIN" && admin.adminState === "APPROVED" && (
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleAction(admin.id, "revoke")}
@@ -193,8 +193,8 @@ export default function AdminMgmtPage() {
         </div>
       </div>
 
-      {/* Promote Student to Admin (Primary Admin only) */}
-      {user?.role === "PRIMARY_ADMIN" && (
+      {/* Promote Student to Admin (Primary Admin / Super Admin only) */}
+      {(user?.role === "PRIMARY_ADMIN" || user?.role === "SUPER_ADMIN") && (
         <div className="glass p-5">
           <h2 className="font-bold mb-4">Promote Student to Admin</h2>
           <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>

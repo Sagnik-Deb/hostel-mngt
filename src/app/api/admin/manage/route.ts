@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
 
     const { action, targetUserId } = await request.json();
 
-    // ── Promote Student to Admin (PRIMARY_ADMIN only) ──
+    // ── Promote Student to Admin (PRIMARY_ADMIN / SUPER_ADMIN only) ──
     if (action === "promote") {
-      if (user.role !== "PRIMARY_ADMIN") {
+      if (user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN") {
         return NextResponse.json(
           { success: false, error: "Only the Primary Admin can promote students" },
           { status: 403 }
@@ -73,9 +73,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Student promoted to Admin (pending approval)" });
     }
 
-    // ── Approve Pending Admin (any existing approved admin) ──
+    // ── Approve Pending Admin (any existing approved admin or super_admin) ──
     if (action === "approve") {
-      if (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN") {
+      if (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN") {
         return NextResponse.json({ success: false, error: "Admin access required" }, { status: 403 });
       }
 
@@ -103,9 +103,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Admin approved" });
     }
 
-    // ── Revoke Admin (PRIMARY_ADMIN only) ──
+    // ── Revoke Admin (PRIMARY_ADMIN / SUPER_ADMIN only) ──
     if (action === "revoke") {
-      if (user.role !== "PRIMARY_ADMIN") {
+      if (user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN") {
         return NextResponse.json(
           { success: false, error: "Only the Primary Admin can revoke admin access" },
           { status: 403 }

@@ -12,6 +12,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // ── Superadmin session: no DB record, return synthetic data ──
+    if (authUser.userId === "superadmin" || authUser.role === "SUPER_ADMIN") {
+      const hostel = await prisma.hostel.findUnique({
+        where: { id: authUser.hostelId },
+        select: { id: true, name: true, code: true },
+      });
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: "superadmin",
+          name: "Super Admin",
+          email: authUser.email,
+          phone: null,
+          role: "SUPER_ADMIN",
+          status: "ACTIVE",
+          adminState: "APPROVED",
+          hostelId: authUser.hostelId,
+          hostelName: hostel?.name || "",
+          hostelCode: hostel?.code || "",
+          hostel: hostel ?? null,
+          room: null,
+          bedNumber: null,
+          profileImage: null,
+          createdAt: new Date().toISOString(),
+        },
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: authUser.userId },
       include: {

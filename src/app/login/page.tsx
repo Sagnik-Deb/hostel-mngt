@@ -152,6 +152,17 @@ export default function LoginPage() {
             )}
           </p>
         </form>
+        {/* Superadmin link — subtle, at the bottom */}
+        <p className="text-center text-xs mt-6" style={{ color: 'var(--color-text-muted)' }}>
+          System administrator?{" "}
+          <Link
+            href="/login/superadmin"
+            className="font-semibold hover:underline"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            👑 Super Admin Login
+          </Link>
+        </p>
       </div>
     </div>
   );

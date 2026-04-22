@@ -57,12 +57,17 @@ export default function DashboardShell({ children, links, title }: DashboardShel
         <div className="mt-auto px-4 pt-8">
           <div className="glass p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ background: 'var(--gradient-aurora)' }}>
-                {user?.name?.charAt(0) || "?"}
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                style={{ background: user?.role === 'SUPER_ADMIN' ? 'linear-gradient(135deg,#ef4444,#7c3aed)' : 'var(--gradient-aurora)' }}
+              >
+                {user?.role === 'SUPER_ADMIN' ? '👑' : (user?.name?.charAt(0) || "?")}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>{user?.email}</p>
+                <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
+                  {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.email}
+                </p>
               </div>
             </div>
             <button onClick={logout} className="btn btn-secondary btn-sm w-full">
@@ -83,12 +88,30 @@ export default function DashboardShell({ children, links, title }: DashboardShel
             >
               ☰
             </button>
+            <div className="flex items-center gap-3">
             <div>
-              <h2 className="text-base font-semibold">{user?.hostel?.name || "Hostel"}</h2>
+              <h2 className="text-base font-semibold">
+                {user?.hostel?.name || user?.hostelName || "Hostel"}
+              </h2>
               <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                {user?.role === "PRIMARY_ADMIN" ? "Primary Admin" : user?.role === "ADMIN" ? "Admin" : "Student"}
+                {user?.role === "SUPER_ADMIN"
+                  ? "Super Admin"
+                  : user?.role === "PRIMARY_ADMIN"
+                  ? "Primary Admin"
+                  : user?.role === "ADMIN"
+                  ? "Admin"
+                  : "Student"}
               </p>
             </div>
+            {user?.role === "SUPER_ADMIN" && (
+              <span
+                className="text-xs font-bold px-2 py-1 rounded-full"
+                style={{ background: 'linear-gradient(135deg,#ef4444,#7c3aed)', color: 'white' }}
+              >
+                👑 SUPER
+              </span>
+            )}
+          </div>
           </div>
 
           <div className="flex items-center gap-4">
