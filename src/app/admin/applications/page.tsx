@@ -10,6 +10,7 @@ interface Application {
   phone: string;
   aadharNumber: string;
   collegeIdUpload: string;
+  allotmentCertificate: string | null;
   hostelId: string;
   emailVerified: boolean;
   roommatePreference: string;
@@ -137,7 +138,8 @@ export default function ApplicationsPage() {
                     <div className="flex gap-1">
                       {app.aadharNumber && <span className="badge badge-success">Aadhar</span>}
                       {app.collegeIdUpload && <span className="badge badge-success">College ID</span>}
-                      {!app.aadharNumber && !app.collegeIdUpload && <span className="badge badge-warning">None</span>}
+                      {app.allotmentCertificate && <span className="badge badge-success">Certificate</span>}
+                      {!app.aadharNumber && !app.collegeIdUpload && !app.allotmentCertificate && <span className="badge badge-warning">None</span>}
                     </div>
                   </td>
                   <td className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
@@ -179,6 +181,25 @@ export default function ApplicationsPage() {
                 <div className="glass p-3">
                   <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Roommate Preference</p>
                   <p className="text-sm mt-1">{selectedApp.roommatePreference}</p>
+                </div>
+              )}
+
+              {selectedApp.allotmentCertificate && (
+                <div className="glass p-3">
+                  <p className="text-xs" style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Allotment Certificate</p>
+                  {selectedApp.allotmentCertificate.endsWith('.pdf') ? (
+                     <a href={selectedApp.allotmentCertificate} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm inline-flex items-center gap-2">
+                       <span>📄</span> View PDF Certificate
+                     </a>
+                  ) : (
+                    <a href={selectedApp.allotmentCertificate} target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src={selectedApp.allotmentCertificate} 
+                        alt="Allotment Certificate" 
+                        className="max-h-48 rounded-lg object-contain border border-[var(--color-border)] hover:opacity-90 transition-opacity"
+                      />
+                    </a>
+                  )}
                 </div>
               )}
 

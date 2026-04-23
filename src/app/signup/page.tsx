@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,13 @@ export default function SignupPage() {
     phone: "", aadharNumber: "", collegeIdUpload: "",
     hostelId: "", roommatePreference: "",
   });
+
+  // Allotment certificate upload state
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [certPreview, setCertPreview] = useState<string | null>(null);
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const certInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [otp, setOtp] = useState("");
 
@@ -55,6 +62,28 @@ export default function SignupPage() {
     setStep(2);
   };
 
+  const handleCertFileChange = (file: File | null) => {
+    if (!file) return;
+    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowed.includes(file.type)) {
+      setError("Certificate must be a JPG, PNG, WebP, or PDF file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Certificate file must be under 5 MB");
+      return;
+    }
+    setError("");
+    setCertFile(file);
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => setCertPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setCertPreview("pdf");
+    }
+  };
+
   const handleStep2 = async () => {
     if (!form.hostelId) {
       setError("Please select a hostel");
@@ -64,6 +93,18 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
+      let allotmentCertificateUrl = "";
+      if (certFile) {
+        setUploadingCert(true);
+        const fd = new FormData();
+        fd.append("file", certFile);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
+        const uploadData = await uploadRes.json();
+        setUploadingCert(false);
+        if (!uploadRes.ok) throw new Error(uploadData.error || "Certificate upload failed");
+        allotmentCertificateUrl = uploadData.url;
+      }
+
       const result = await signup({
         name: form.name,
         email: form.email,
@@ -73,6 +114,7 @@ export default function SignupPage() {
         collegeIdUpload: form.collegeIdUpload,
         hostelId: form.hostelId,
         roommatePreference: form.roommatePreference,
+        allotmentCertificate: allotmentCertificateUrl || undefined,
       });
       setSignupEmail(result.email);
       setStep(3);
@@ -80,6 +122,7 @@ export default function SignupPage() {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
       setLoading(false);
+      setUploadingCert(false);
     }
   };
 
@@ -208,10 +251,89 @@ export default function SignupPage() {
                   style={{ resize: 'vertical' }}
                 />
               </div>
+
+              {/* Allotment Certificate Upload */}
+              <div>
+                <label className="input-label">
+                  Hostel Allotment Certificate
+                  <span style={{ color: 'var(--color-text-muted)', fontWeight: 400, fontSize: '0.75rem', marginLeft: '0.5rem' }}>(JPG/PNG/PDF, max 5 MB)</span>
+                </label>
+                <div
+                  id="cert-upload-zone"
+                  onClick={() => certInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const dropped = e.dataTransfer.files[0];
+                    handleCertFileChange(dropped);
+                  }}
+                  style={{
+                    border: `2px dashed ${isDragging ? 'var(--color-primary)' : certFile ? 'var(--color-success)' : 'var(--color-border, rgba(255,255,255,0.15))'}`,
+                    borderRadius: '0.75rem',
+                    padding: '1.25rem',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: isDragging ? 'rgba(99,102,241,0.08)' : certFile ? 'rgba(16,185,129,0.06)' : 'var(--color-surface-2, rgba(255,255,255,0.04))',
+                  }}
+                >
+                  {certPreview && certPreview !== 'pdf' ? (
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={certPreview}
+                        alt="Certificate preview"
+                        style={{ maxHeight: '140px', maxWidth: '100%', borderRadius: '0.5rem', objectFit: 'contain' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
+                        style={{
+                          position: 'absolute', top: '-8px', right: '-8px',
+                          width: '22px', height: '22px', borderRadius: '50%',
+                          background: 'var(--color-danger, #ef4444)', color: 'white',
+                          border: 'none', cursor: 'pointer', fontSize: '0.75rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          lineHeight: 1,
+                        }}
+                        aria-label="Remove certificate"
+                      >✕</button>
+                    </div>
+                  ) : certPreview === 'pdf' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ fontSize: '2rem' }}>📄</div>
+                      <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600 }}>{certFile?.name}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
+                        style={{ fontSize: '0.75rem', color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                      >Remove</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)' }}>
+                      <div style={{ fontSize: '2rem' }}>🪪</div>
+                      <p style={{ margin: 0, fontSize: '0.875rem' }}>
+                        <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Click to upload</span> or drag &amp; drop
+                      </p>
+                      <p style={{ margin: 0, fontSize: '0.75rem' }}>Hostel allotment confirmation certificate</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={certInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  style={{ display: 'none' }}
+                  id="cert-file-input"
+                  onChange={(e) => handleCertFileChange(e.target.files?.[0] ?? null)}
+                />
+              </div>
+
               <div className="flex gap-3">
                 <button onClick={() => setStep(1)} className="btn btn-secondary flex-1">← Back</button>
-                <button onClick={handleStep2} className="btn btn-primary flex-1" disabled={loading} id="signup-submit">
-                  {loading ? "Submitting..." : "Submit & Verify Email"}
+                <button onClick={handleStep2} className="btn btn-primary flex-1" disabled={loading || uploadingCert} id="signup-submit">
+                  {uploadingCert ? "Uploading certificate..." : loading ? "Submitting..." : "Submit & Verify Email"}
                 </button>
               </div>
             </div>

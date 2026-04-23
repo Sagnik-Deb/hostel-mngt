@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       phone,
       aadharNumber,
       collegeIdUpload,
+      allotmentCertificate,
       hostelId,
       roommatePreference,
       roommateQuestionnaire,
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
         phone,
         aadharNumber,
         collegeIdUpload,
+        allotmentCertificate,
         hostelId,
         roommatePreference,
         roommateQuestionnaire: roommateQuestionnaire || undefined,
@@ -105,8 +107,9 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Signup error:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: message },
       { status: 500 }
     );
   }

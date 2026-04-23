@@ -175,7 +175,8 @@ model Application {
   name                  String
   phone                 String?
   aadharNumber          String?
-  collegeIdUpload       String?
+  collegeIdUpload          String?
+  allotmentCertificate     String?
   hostelId              String
   emailVerified         Boolean  @default(false)
   roommatePreference    String?
