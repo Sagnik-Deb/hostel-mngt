@@ -117,12 +117,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "Target must be an admin" }, { status: 400 });
       }
 
+      const isDirectAdmin = !target.collegeId && !target.aadharNumber;
+
       await prisma.user.update({
         where: { id: targetUserId },
-        data: {
-          role: "STUDENT",
-          adminState: "REVOKED",
-        },
+        data: isDirectAdmin
+          ? {
+              status: "CHECKED_OUT",
+              adminState: "REVOKED",
+            }
+          : {
+              role: "STUDENT",
+              adminState: "REVOKED",
+            },
       });
 
       await createNotification({

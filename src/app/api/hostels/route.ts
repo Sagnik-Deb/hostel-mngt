@@ -11,25 +11,38 @@ export async function GET() {
             rooms: true,
           },
         },
+        users: {
+          where: {
+            OR: [
+              { role: "PRIMARY_ADMIN" },
+              { role: "ADMIN", adminState: "APPROVED" }
+            ],
+            status: "ACTIVE"
+          },
+          select: { name: true }
+        }
       },
       orderBy: { name: "asc" },
     });
 
-    const data = hostels.map((h) => ({
-      id: h.id,
-      name: h.name,
-      code: h.code,
-      description: h.description,
-      wardenName: h.wardenName,
-      wardenEmail: h.wardenEmail,
-      wardenPhone: h.wardenPhone,
-      address: h.address,
-      rules: h.rules,
-      imageUrl: h.imageUrl,
-      totalRooms: h.totalRooms || h._count.rooms,
-      capacity: h.capacity,
-      currentOccupancy: h._count.users,
-    }));
+    const data = hostels.map((h) => {
+      const activeAdminNames = h.users.map((u) => u.name).join(", ");
+      return {
+        id: h.id,
+        name: h.name,
+        code: h.code,
+        description: h.description,
+        wardenName: activeAdminNames || "No Active Admins",
+        wardenEmail: h.wardenEmail,
+        wardenPhone: h.wardenPhone,
+        address: h.address,
+        rules: h.rules,
+        imageUrl: h.imageUrl,
+        totalRooms: h.totalRooms || h._count.rooms,
+        capacity: h.capacity,
+        currentOccupancy: h._count.users,
+      };
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

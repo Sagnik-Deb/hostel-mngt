@@ -31,14 +31,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Admin record not found" }, { status: 404 });
     }
 
-    // Resign: demote back to STUDENT with REVOKED adminState
+    const isDirectAdmin = !dbUser.collegeId && !dbUser.aadharNumber;
+
+    // Resign logic: 
+    // If they were directly registered as admin, they should not become students, just checkout.
+    // Otherwise, demote back to STUDENT with REVOKED adminState.
     await prisma.user.update({
       where: { id: user.userId },
-      data: {
-        role: "STUDENT",
-        adminState: "REVOKED",
-        // Remove room and bed if they still have one assigned as admin
-      },
+      data: isDirectAdmin 
+        ? {
+            status: "CHECKED_OUT",
+            adminState: "REVOKED",
+          }
+        : {
+            role: "STUDENT",
+            adminState: "REVOKED",
+            // Remove room and bed if they still have one assigned as admin
+          },
     });
 
     // Optionally notify other admins

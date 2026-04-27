@@ -161,7 +161,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="glass p-3">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Warden</p>
+                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Admin(s)</p>
                   <p className="font-semibold text-sm">{selectedHostel.wardenName}</p>
                 </div>
                 <div className="glass p-3">
