@@ -126,8 +126,9 @@ export default function HomePage() {
                 style={{ animationDelay: `${i * 50}ms` }}
                 onClick={() => setSelectedHostel(hostel)}
               >
-                <div className="h-32 flex items-center justify-center bg-blue-50/50 border-b border-border/50">
-                  <Home className="w-12 h-12 text-blue-200" />
+                <div className="aspect-video w-full flex items-center justify-center bg-blue-50/50 border-b border-border/50 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20"></div>
+                  <Home className="w-12 h-12 text-blue-500 relative z-10 opacity-50" />
                 </div>
                 <CardContent className="p-5">
                   <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
@@ -150,70 +151,81 @@ export default function HomePage() {
       {/* Hostel Detail Modal */}
       <Dialog open={!!selectedHostel} onOpenChange={(open) => !open && setSelectedHostel(null)}>
         {selectedHostel && (
-          <DialogContent className="max-w-2xl p-0 overflow-hidden border-none shadow-xl rounded-xl">
-            <div className="h-40 flex items-center justify-center bg-blue-50 border-b border-blue-100">
-              <Home className="w-16 h-16 text-blue-200" />
+          <DialogContent className="sm:max-w-4xl md:max-w-4xl p-0 overflow-hidden border-none shadow-xl rounded-xl flex flex-col md:flex-row h-[90vh] md:h-[600px]">
+            <div className="w-full md:w-2/5 h-48 md:h-full flex flex-col items-center justify-center bg-blue-50 border-b md:border-b-0 md:border-r border-blue-100 relative overflow-hidden shrink-0">
+              <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-30"></div>
+              <Home className="w-16 h-16 text-blue-500 relative z-10 opacity-50 mb-4" />
+              <div className="relative z-10 text-center px-6 hidden md:block">
+                <h3 className="text-xl font-bold text-blue-900 mb-2">{selectedHostel.name}</h3>
+                <Badge variant="secondary" className="bg-white/80 text-blue-700 hover:bg-white border-none">
+                  {selectedHostel.currentOccupancy}/{selectedHostel.capacity} Occupied
+                </Badge>
+              </div>
             </div>
-            <div className="p-8">
-              <DialogHeader className="mb-2">
-                <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">{selectedHostel.name}</DialogTitle>
-              </DialogHeader>
-              <p className="text-sm mb-6 text-muted-foreground leading-relaxed">{selectedHostel.description}</p>
+            <div className="w-full md:w-3/5 flex flex-col h-full overflow-hidden">
+              <div className="p-8 overflow-y-auto flex-1">
+                <DialogHeader className="mb-2 md:hidden">
+                  <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">{selectedHostel.name}</DialogTitle>
+                </DialogHeader>
+                <div className="hidden md:block mb-2">
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">Overview</h2>
+                </div>
+                <p className="text-sm mb-6 text-muted-foreground leading-relaxed">{selectedHostel.description}</p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                  <CardContent className="p-4 flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-1.5 text-primary mb-1">
-                      <User className="w-4 h-4" />
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Admin</span>
-                    </div>
-                    <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenName}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                  <CardContent className="p-4 flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-1.5 text-primary mb-1">
-                      <Phone className="w-4 h-4" />
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Contact</span>
-                    </div>
-                    <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenPhone}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                  <CardContent className="p-4 flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-1.5 text-primary mb-1">
-                      <Hash className="w-4 h-4" />
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Rooms</span>
-                    </div>
-                    <p className="font-semibold text-sm text-foreground">{selectedHostel.totalRooms}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                  <CardContent className="p-4 flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-1.5 text-primary mb-1">
-                      <Users className="w-4 h-4" />
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Occupancy</span>
-                    </div>
-                    <p className="font-semibold text-sm text-foreground">{selectedHostel.currentOccupancy} / {selectedHostel.capacity}</p>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                    <CardContent className="p-4 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-1.5 text-primary mb-1">
+                        <User className="w-4 h-4" />
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Admin</span>
+                      </div>
+                      <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenName}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                    <CardContent className="p-4 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-1.5 text-primary mb-1">
+                        <Phone className="w-4 h-4" />
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Contact</span>
+                      </div>
+                      <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenPhone}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                    <CardContent className="p-4 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-1.5 text-primary mb-1">
+                        <Hash className="w-4 h-4" />
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Rooms</span>
+                      </div>
+                      <p className="font-semibold text-sm text-foreground">{selectedHostel.totalRooms}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                    <CardContent className="p-4 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-1.5 text-primary mb-1">
+                        <Users className="w-4 h-4" />
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Occupancy</span>
+                      </div>
+                      <p className="font-semibold text-sm text-foreground">{selectedHostel.currentOccupancy} / {selectedHostel.capacity}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mb-2">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-foreground">
+                    <BookOpen className="w-4 h-4 text-primary" /> Hostel Rules
+                  </h4>
+                  <ul className="space-y-2 bg-slate-50 p-4 rounded-lg">
+                    {selectedHostel.rules.map((rule, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className="text-primary mt-0.5">•</span>
+                        <span className="leading-relaxed">{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-
-              <div className="mb-8">
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-foreground">
-                  <BookOpen className="w-4 h-4 text-primary" /> Hostel Rules
-                </h4>
-                <ul className="space-y-2 bg-slate-50 p-4 rounded-lg">
-                  {selectedHostel.rules.map((rule, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span className="leading-relaxed">{rule}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-6 border-t border-border">
+              <div className="flex justify-end gap-3 p-6 border-t border-border bg-background mt-auto shrink-0">
                 <Button variant="ghost" onClick={() => setSelectedHostel(null)}>Cancel</Button>
                 <Link href="/signup">
                   <Button className="gap-2 px-6">Apply Now <ArrowRight className="w-4 h-4" /></Button>
