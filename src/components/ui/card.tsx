@@ -6,7 +6,7 @@ function Card({
   className,
   size = "default",
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" | "md" }) {
+}: React.ComponentProps<"div"> & { size?: "default" | "sm" | "md" | "lg" }) {
   return (
     <div
       data-slot="card"

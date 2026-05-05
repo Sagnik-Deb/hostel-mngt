@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = getAuthUser(request);
-    if (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN")) {
+    if (!user || (user.role !== "ADMIN" && user.role !== "PRIMARY_ADMIN" && user.role !== "SUPER_ADMIN")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 

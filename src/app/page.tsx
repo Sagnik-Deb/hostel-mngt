@@ -48,8 +48,9 @@ export default function HomePage() {
 
         <nav className="relative z-10 flex items-center justify-between max-w-7xl mx-auto px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-primary shadow-sm">
-              <Building2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ">
+              {/* <Building2 className="w-5 h-5" /> */}
+              <img src="/logo.png" alt="" />
             </div>
             <span className="text-xl font-bold tracking-tight text-foreground">AUSHostel</span>
           </div>

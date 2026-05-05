@@ -154,9 +154,12 @@ export default function SuperadminLoginPage() {
         </Card>
 
         {/* Links */}
-        <div className="text-center mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-8 gap-4 px-2">
           <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to regular login
+          </Link>
+          <Link href="/login/superadmin/create-hostel" className="text-sm font-medium text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 transition-colors">
+             Create New Hostel
           </Link>
         </div>
       </div>
