@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Check, Mail, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, ShieldAlert, PartyPopper } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -114,250 +120,182 @@ export default function AdminSignupPage() {
   const steps = ["Personal Info", "Select Hostel", "Verify Email", "Done"];
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, var(--color-bg) 50%, rgba(6,182,212,0.05) 100%)" }}
-    >
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-20 right-10 w-72 h-72 rounded-full opacity-10 blur-3xl bg-indigo-500"></div>
+      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full opacity-10 blur-3xl bg-purple-500"></div>
+
+      <div className="w-full max-w-lg relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl"
-              style={{ background: "var(--gradient-warm)" }}
-            >
-              🛡️
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold">HostelHub Admin</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground">AUSHostel Admin</span>
           </Link>
-          <h1 className="text-2xl font-bold mb-2">Admin Registration</h1>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            Register to manage a hostel — subject to approval by existing admins
-          </p>
+          <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Admin Registration</h1>
+          <p className="text-sm text-muted-foreground">Register to manage a hostel — subject to approval</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 px-2">
           {steps.map((label, i) => (
             <div key={i} className="flex-1 text-center">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-1 text-sm font-bold transition-all"
-                style={{
-                  background:
-                    step > i + 1
-                      ? "var(--color-success)"
-                      : step === i + 1
-                      ? "var(--gradient-warm)"
-                      : "var(--color-surface-2)",
-                  color: step >= i + 1 ? "white" : "var(--color-text-muted)",
-                }}
+                className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold transition-colors ${step > i + 1
+                    ? "bg-emerald-500 text-white"
+                    : step === i + 1
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-muted text-muted-foreground"
+                  }`}
               >
-                {step > i + 1 ? "✓" : i + 1}
+                {step > i + 1 ? <Check className="w-4 h-4" /> : i + 1}
               </div>
-              <p
-                className="text-xs"
-                style={{ color: step === i + 1 ? "var(--color-text)" : "var(--color-text-muted)" }}
-              >
+              <p className={`text-xs font-medium ${step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}>
                 {label}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="glass p-6">
-          {error && (
-            <div
-              className="p-3 rounded-lg text-sm font-medium mb-4"
-              style={{ background: "rgba(239,68,68,0.1)", color: "var(--color-danger)" }}
-            >
-              {error}
-            </div>
-          )}
+        <Card className="border-border shadow-sm">
+          <CardContent className="pt-6">
+            {error && (
+              <div className="p-3 rounded-lg text-sm font-medium mb-6 bg-red-50 text-red-600 border border-red-100">
+                {error}
+              </div>
+            )}
 
-          {/* Step 1: Personal Information */}
-          {step === 1 && (
-            <div className="space-y-4 animate-fade-in">
-              <div
-                className="p-3 rounded-lg text-sm mb-2"
-                style={{ background: "rgba(124,58,237,0.1)", color: "var(--color-primary)" }}
-              >
-                🛡️ After registration, your account needs approval from an existing hostel admin before you can log in.
+            {/* Step 1: Personal Information */}
+            {step === 1 && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="p-3 rounded-lg text-sm mb-2 bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-start gap-2">
+                  <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+                  <p>After registration, your account needs approval from an existing hostel admin before you can log in.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-name">Full Name *</Label>
+                  <Input name="name" id="admin-signup-name" placeholder="John Doe" value={form.name} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-email">Email *</Label>
+                  <Input name="email" id="admin-signup-email" type="email" placeholder="admin@example.com" value={form.email} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-phone">Phone</Label>
+                  <Input name="phone" id="admin-signup-phone" placeholder="+91-XXXXXXXXXX" value={form.phone} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-password">Password *</Label>
+                  <Input name="password" id="admin-signup-password" type="password" placeholder="Min 6 characters" value={form.password} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-confirm-password">Confirm Password *</Label>
+                  <Input name="confirmPassword" id="admin-signup-confirm-password" type="password" placeholder="Re-enter password" value={form.confirmPassword} onChange={handleChange} />
+                </div>
+                <Button onClick={handleStep1} className="w-full mt-4 h-11 gap-2 bg-indigo-600 hover:bg-indigo-700">
+                  Next Step <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
-              <div>
-                <label className="input-label">Full Name *</label>
-                <input
-                  name="name"
-                  className="input"
-                  placeholder="John Doe"
-                  value={form.name}
-                  onChange={handleChange}
-                  id="admin-signup-name"
-                />
-              </div>
-              <div>
-                <label className="input-label">Email *</label>
-                <input
-                  name="email"
-                  type="email"
-                  className="input"
-                  placeholder="admin@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  id="admin-signup-email"
-                />
-              </div>
-              <div>
-                <label className="input-label">Phone</label>
-                <input
-                  name="phone"
-                  className="input"
-                  placeholder="+91-XXXXXXXXXX"
-                  value={form.phone}
-                  onChange={handleChange}
-                  id="admin-signup-phone"
-                />
-              </div>
-              <div>
-                <label className="input-label">Password *</label>
-                <input
-                  name="password"
-                  type="password"
-                  className="input"
-                  placeholder="Min 6 characters"
-                  value={form.password}
-                  onChange={handleChange}
-                  id="admin-signup-password"
-                />
-              </div>
-              <div>
-                <label className="input-label">Confirm Password *</label>
-                <input
-                  name="confirmPassword"
-                  type="password"
-                  className="input"
-                  placeholder="Re-enter password"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  id="admin-signup-confirm-password"
-                />
-              </div>
-              <button
-                onClick={handleStep1}
-                className="btn btn-primary w-full btn-lg"
-                id="admin-signup-next-1"
-              >
-                Next → Select Hostel
-              </button>
-            </div>
-          )}
+            )}
 
-          {/* Step 2: Hostel Selection */}
-          {step === 2 && (
-            <div className="space-y-4 animate-fade-in">
-              <div>
-                <label className="input-label">Select Hostel to Manage *</label>
-                <select
-                  name="hostelId"
-                  className="input"
-                  value={form.hostelId}
-                  onChange={handleChange}
-                  id="admin-signup-hostel"
-                >
-                  <option value="">Choose a hostel</option>
-                  {hostels.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                The existing admins of the selected hostel will be notified and must approve your application before you gain access.
-              </p>
-              <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className="btn btn-secondary flex-1">
-                  ← Back
-                </button>
-                <button
-                  onClick={handleStep2}
-                  className="btn btn-primary flex-1"
-                  disabled={loading}
-                  id="admin-signup-submit"
-                >
-                  {loading ? "Submitting..." : "Submit & Verify Email"}
-                </button>
-              </div>
-            </div>
-          )}
+            {/* Step 2: Hostel Selection */}
+            {step === 2 && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+                <div className="space-y-2">
+                  <Label htmlFor="admin-signup-hostel">Select Hostel to Manage *</Label>
+                  <Select name="hostelId" value={form.hostelId} onValueChange={(v) => setForm({ ...form, hostelId: v })} required>
+                    <SelectTrigger id="admin-signup-hostel">
+                      <SelectValue placeholder="Choose a hostel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hostels.map((h) => (
+                        <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    The existing admins of the selected hostel will be notified and must approve your application before you gain access.
+                  </p>
+                </div>
 
-          {/* Step 3: OTP Verification */}
-          {step === 3 && (
-            <div className="space-y-4 animate-fade-in text-center">
-              <div className="text-5xl mb-4">📧</div>
-              <h3 className="text-lg font-bold">Verify Your Email</h3>
-              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                We&apos;ve sent a 6-digit OTP to <strong>{signupEmail}</strong>
-              </p>
-              <input
-                className="input text-center text-2xl tracking-widest"
-                placeholder="000000"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                id="admin-signup-otp"
-              />
-              <button
-                onClick={handleVerify}
-                className="btn btn-primary w-full btn-lg"
-                disabled={loading}
-                id="admin-signup-verify"
-              >
-                {loading ? "Verifying..." : "Verify Email"}
-              </button>
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                Note: If SMTP is not configured, check the server console for the OTP.
-              </p>
-            </div>
-          )}
-
-          {/* Step 4: Success */}
-          {step === 4 && (
-            <div className="text-center space-y-4 animate-fade-in py-6">
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto text-4xl"
-                style={{ background: "rgba(124,58,237,0.12)" }}
-              >
-                🎉
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 gap-2">
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </Button>
+                  <Button onClick={handleStep2} className="flex-1 bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+                    {loading ? "Submitting..." : "Submit & Verify"}
+                  </Button>
+                </div>
               </div>
-              <h3 className="text-xl font-bold">Registration Complete!</h3>
-              <div
-                className="p-4 rounded-xl text-sm text-left space-y-2"
-                style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}
-              >
-                <p className="font-semibold" style={{ color: "var(--color-success)" }}>
-                  ✅ Email verified successfully
-                </p>
-                <p style={{ color: "var(--color-text-muted)" }}>
-                  Your admin registration is now <strong>pending approval</strong>. The existing admins of your selected hostel have been notified.
-                </p>
-                <p style={{ color: "var(--color-text-muted)" }}>
-                  Once approved, you will receive a notification and can log in to the admin portal.
+            )}
+
+            {/* Step 3: OTP Verification */}
+            {step === 3 && (
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 text-center py-6">
+                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">Verify Your Email</h3>
+                  <p className="text-sm text-muted-foreground">
+                    We&apos;ve sent a 6-digit OTP to <strong className="text-foreground">{signupEmail}</strong>
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Input
+                    className="text-center text-3xl tracking-[0.5em] font-mono h-16 w-3/4 mx-auto"
+                    placeholder="000000"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  />
+                  <Button onClick={handleVerify} className="w-full h-11 bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+                    {loading ? "Verifying..." : "Verify Email"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Note: If SMTP is not configured, check the server console for the OTP.
                 </p>
               </div>
-              <Link href="/login" className="btn btn-primary btn-lg inline-flex" id="admin-signup-go-login">
-                Go to Login →
-              </Link>
-            </div>
-          )}
-        </div>
+            )}
 
-        <p className="text-center text-sm mt-6" style={{ color: "var(--color-text-muted)" }}>
+            {/* Step 4: Success */}
+            {step === 4 && (
+              <div className="text-center space-y-6 animate-in fade-in zoom-in-95 duration-300 py-6">
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500">
+                  <PartyPopper className="w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-bold tracking-tight text-foreground">Registration Complete!</h3>
+                <div className="p-4 rounded-xl text-sm text-left space-y-3 bg-emerald-50 border border-emerald-100">
+                  <p className="font-semibold text-emerald-700 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" /> Email verified successfully
+                  </p>
+                  <p className="text-emerald-800 leading-relaxed">
+                    Your admin registration is now <strong>pending approval</strong>. The existing admins of your selected hostel have been notified.
+                  </p>
+                  <p className="text-emerald-800 leading-relaxed">
+                    Once approved, you will receive a notification and can log in to the admin portal.
+                  </p>
+                </div>
+                <Link href="/login" className="inline-block mt-4">
+                  <Button className="h-11 px-8 gap-2 bg-indigo-600 hover:bg-indigo-700">
+                    Go to Login <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-sm mt-8 text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold" style={{ color: "var(--color-primary)" }}>
+          <Link href="/login" className="font-semibold text-primary hover:underline mr-2">
             Sign in here
           </Link>
-          {" · "}
-          <Link href="/signup" className="font-semibold" style={{ color: "var(--color-text-muted)" }}>
+          ·
+          <Link href="/signup" className="font-semibold text-muted-foreground hover:text-foreground ml-2 transition-colors">
             Student signup
           </Link>
         </p>

@@ -2,6 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquareWarning, Plus, CheckCircle2, Clock, AlertCircle, XCircle, MessageSquare } from "lucide-react";
 
 interface Complaint {
   id: string;
@@ -14,8 +22,11 @@ interface Complaint {
   createdAt: string;
 }
 
-const STATUS_BADGES: Record<string, string> = {
-  OPEN: "badge-info", IN_PROGRESS: "badge-warning", RESOLVED: "badge-success", CLOSED: "badge-gray",
+const STATUS_BADGES: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", icon: React.ReactNode }> = {
+  OPEN: { variant: "secondary", icon: <AlertCircle className="w-3 h-3 mr-1" /> }, 
+  IN_PROGRESS: { variant: "default", icon: <Clock className="w-3 h-3 mr-1" /> }, 
+  RESOLVED: { variant: "default", icon: <CheckCircle2 className="w-3 h-3 mr-1" /> }, 
+  CLOSED: { variant: "outline", icon: <XCircle className="w-3 h-3 mr-1" /> },
 };
 
 export default function StudentComplaintsPage() {
@@ -59,78 +70,121 @@ export default function StudentComplaintsPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}></div></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin border-primary"></div></div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">📢 Complaints</h1>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Raise Complaint</button>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground">
+          <MessageSquareWarning className="w-6 h-6 text-primary" /> Complaints
+        </h1>
+        {!showForm && (
+          <Button onClick={() => setShowForm(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Raise Complaint
+          </Button>
+        )}
       </div>
 
       {showForm && (
-        <div className="glass p-6 animate-fade-in">
-          <h2 className="font-bold mb-4">New Complaint</h2>
-          {error && <div className="p-3 rounded-lg text-sm mb-4" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)' }}>{error}</div>}
-          <div className="space-y-4">
-            <div><label className="input-label">Subject</label><input className="input" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief description of the issue" /></div>
-            <div><label className="input-label">Description</label><textarea className="input" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detailed description..." style={{ resize: 'vertical' }} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="input-label">Category</label>
-                <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
-                  <option value="">Select category</option>
-                  <option value="Maintenance">Maintenance</option>
-                  <option value="Cleanliness">Cleanliness</option>
-                  <option value="Food">Food</option>
-                  <option value="Security">Security</option>
-                  <option value="Noise">Noise</option>
-                  <option value="Other">Other</option>
-                </select>
+        <Card className="border-border shadow-sm animate-in slide-in-from-top-4 duration-300">
+          <CardHeader>
+            <CardTitle>New Complaint</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <div className="p-3 rounded-lg text-sm bg-red-50 text-red-600 border border-red-100">{error}</div>}
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief description of the issue" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detailed description..." className="resize-none" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Maintenance">Maintenance</SelectItem>
+                    <SelectItem value="Cleanliness">Cleanliness</SelectItem>
+                    <SelectItem value="Food">Food</SelectItem>
+                    <SelectItem value="Security">Security</SelectItem>
+                    <SelectItem value="Noise">Noise</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <label className="input-label">Priority</label>
-                <select className="input" value={priority} onChange={(e) => setPriority(e.target.value)}>
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
-                </select>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">Low</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="URGENT">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>{submitting ? "Submitting..." : "Submit Complaint"}</button>
-              <button className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+            <div className="flex gap-3 pt-2">
+              <Button onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit Complaint"}
+              </Button>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {complaints.length === 0 ? (
-        <div className="glass p-12 text-center"><p style={{ color: 'var(--color-text-muted)' }}>No complaints yet</p></div>
+        <Card className="border-dashed bg-transparent border-border">
+          <CardContent className="p-12 text-center text-muted-foreground flex flex-col items-center">
+            <MessageSquareWarning className="w-12 h-12 mb-3 opacity-20" />
+            <p>No complaints yet</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-3">
-          {complaints.map((c) => (
-            <div key={c.id} className="glass p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h3 className="font-bold text-sm">{c.subject}</h3>
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    {c.category && `${c.category} • `}{new Date(c.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className={`badge ${STATUS_BADGES[c.status]}`}>{c.status}</span>
-              </div>
-              <p className="text-sm mb-2">{c.description}</p>
-              {c.response && (
-                <div className="glass p-3" style={{ borderLeftWidth: '3px', borderLeftColor: 'var(--color-success)' }}>
-                  <p className="text-xs font-semibold" style={{ color: 'var(--color-success)' }}>Admin Response:</p>
-                  <p className="text-sm">{c.response}</p>
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="space-y-4">
+          {complaints.map((c) => {
+            const statusConfig = STATUS_BADGES[c.status] || { variant: "outline", icon: null };
+            return (
+              <Card key={c.id} className="shadow-sm border-border overflow-hidden">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                    <div>
+                      <h3 className="font-semibold text-foreground text-lg leading-tight mb-1">{c.subject}</h3>
+                      <p className="text-xs text-muted-foreground flex items-center gap-2">
+                        {c.category && <span className="bg-muted px-2 py-0.5 rounded-full">{c.category}</span>}
+                        <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                      </p>
+                    </div>
+                    <Badge variant={statusConfig.variant} className={c.status === "RESOLVED" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""}>
+                      {statusConfig.icon}
+                      {c.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-foreground/80 mb-4 bg-muted/30 p-3 rounded-lg leading-relaxed">{c.description}</p>
+                  
+                  {c.response && (
+                    <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex gap-3">
+                      <MessageSquare className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Admin Response</p>
+                        <p className="text-sm text-emerald-900 leading-relaxed">{c.response}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

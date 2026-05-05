@@ -2,6 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Plane, Bell, Home, User, Users, Phone, Hash, ArrowRight, Sparkles, BookOpen } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -17,21 +22,6 @@ interface Hostel {
   capacity: number;
   currentOccupancy: number;
 }
-
-const HOSTEL_GRADIENTS = [
-  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-  "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-  "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-  "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
-  "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
-  "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
-  "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)",
-  "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)",
-  "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)",
-  "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
-  "linear-gradient(135deg, #f5576c 0%, #ff6a88 100%)",
-];
 
 export default function HomePage() {
   const [hostels, setHostels] = useState<Hostel[]>([]);
@@ -49,61 +39,69 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(6,182,212,0.1) 50%, rgba(124,58,237,0.05) 100%)' }}></div>
-        <div className="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 blur-3xl" style={{ background: 'var(--color-primary)' }}></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'var(--color-accent)' }}></div>
+      <header className="relative overflow-hidden border-b border-border">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-blue-50/30 to-primary/[0.02]"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 blur-3xl bg-primary"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-10 blur-3xl bg-blue-300"></div>
 
         <nav className="relative z-10 flex items-center justify-between max-w-7xl mx-auto px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ background: 'var(--gradient-primary)' }}>H</div>
-            <span className="text-xl font-bold">HostelHub</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-primary shadow-sm">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-foreground">AUSHostel</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="btn btn-secondary">Login</Link>
-            <Link href="/signup" className="btn btn-primary">Register</Link>
+            <Link href="/login"><Button variant="outline">Login</Button></Link>
+            <Link href="/signup"><Button>Register</Button></Link>
           </div>
         </nav>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-medium" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
-            ✨ Smart Hostel Management
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-medium bg-blue-50 text-blue-600 border border-blue-100">
+            <Sparkles className="w-4 h-4" /> Smart Hostel Management
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight text-foreground">
             Welcome to{" "}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
-              HostelHub
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
+              AUSHostel
             </span>
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-muted-foreground">
             Industry-grade hostel management across 12 premier hostels. Smart room allocation, leave management, instant notifications, and seamless admin workflows.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link href="/signup" className="btn btn-primary btn-lg">
-              🚀 Get Started
+            <Link href="/signup">
+              <Button size="lg" className="gap-2 text-md px-8 shadow-sm">
+                Get Started <ArrowRight className="w-4 h-4" />
+              </Button>
             </Link>
-            <a href="#hostels" className="btn btn-secondary btn-lg">
-              🏠 Explore Hostels
+            <a href="#hostels">
+              <Button variant="secondary" size="lg" className="gap-2 text-md px-8 shadow-sm">
+                <Home className="w-4 h-4" /> Explore Hostels
+              </Button>
             </a>
           </div>
         </div>
       </header>
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
+      <section className="max-w-7xl mx-auto px-6 py-20 border-b border-border bg-slate-50/50">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: "🏢", title: "12 Hostel Silos", desc: "Each hostel operates independently with dedicated admin, rooms, and student management." },
-            { icon: "✈️", title: "Smart Leave Engine", desc: "Apply for leave, get automated 24h return reminders, request extensions — all digitally." },
-            { icon: "🔔", title: "Instant Notifications", desc: "Real-time in-app and email notifications for every system action and update." },
+            { icon: <Building2 className="w-10 h-10 mb-5 text-primary mx-auto" />, title: "12 Hostel Silos", desc: "Each hostel operates independently with dedicated admin, rooms, and student management." },
+            { icon: <Plane className="w-10 h-10 mb-5 text-primary mx-auto" />, title: "Smart Leave Engine", desc: "Apply for leave, get automated 24h return reminders, request extensions — all digitally." },
+            { icon: <Bell className="w-10 h-10 mb-5 text-primary mx-auto" />, title: "Instant Notifications", desc: "Real-time in-app and email notifications for every system action and update." },
           ].map((f, i) => (
-            <div key={i} className="glass p-8 text-center glass-hover" style={{ transition: 'all 0.3s ease' }}>
-              <div className="text-5xl mb-4">{f.icon}</div>
-              <h3 className="text-lg font-bold mb-2">{f.title}</h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{f.desc}</p>
-            </div>
+            <Card key={i} className="text-center hover:border-primary/50 transition-colors shadow-sm bg-card border-border">
+              <CardContent className="pt-10 pb-10 px-6">
+                {f.icon}
+                <h3 className="text-xl font-semibold mb-3 tracking-tight text-foreground">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </section>
@@ -111,99 +109,132 @@ export default function HomePage() {
       {/* Hostels Grid */}
       <section id="hostels" className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our 12 Hostels</h2>
-          <p style={{ color: 'var(--color-text-muted)' }}>Browse details, wardens, and rules for each hostel</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">Our 12 Hostels</h2>
+          <p className="text-muted-foreground">Browse details, wardens, and rules for each hostel</p>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}></div>
+            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin border-primary"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {hostels.map((hostel, i) => (
-              <div
+              <Card
                 key={hostel.id}
-                className="glass glass-hover cursor-pointer overflow-hidden animate-fade-in"
+                className="cursor-pointer overflow-hidden hover:shadow-md hover:border-primary/40 transition-all border-border"
                 style={{ animationDelay: `${i * 50}ms` }}
                 onClick={() => setSelectedHostel(hostel)}
               >
-                <div className="h-32 flex items-center justify-center" style={{ background: HOSTEL_GRADIENTS[i % 12] }}>
-                  <span className="text-5xl">🏠</span>
+                <div className="h-32 flex items-center justify-center bg-blue-50/50 border-b border-border/50">
+                  <Home className="w-12 h-12 text-blue-200" />
                 </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-base mb-1">{hostel.name}</h3>
-                  <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>{hostel.description}</p>
+                <CardContent className="p-5">
+                  <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
+                  <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
                   <div className="flex items-center justify-between text-xs">
-                    <span style={{ color: 'var(--color-text-muted)' }}>
-                      👨‍💼 {hostel.wardenName}
+                    <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                      <User className="w-3.5 h-3.5" /> {hostel.wardenName}
                     </span>
-                    <span className="badge badge-info">
+                    <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border-none">
                       {hostel.currentOccupancy}/{hostel.capacity}
-                    </span>
+                    </Badge>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
       </section>
 
       {/* Hostel Detail Modal */}
-      {selectedHostel && (
-        <div className="modal-overlay" onClick={() => setSelectedHostel(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="h-40 flex items-center justify-center" style={{ background: HOSTEL_GRADIENTS[hostels.indexOf(selectedHostel) % 12], borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
-              <h2 className="text-2xl font-bold text-white">{selectedHostel.name}</h2>
+      <Dialog open={!!selectedHostel} onOpenChange={(open) => !open && setSelectedHostel(null)}>
+        {selectedHostel && (
+          <DialogContent className="max-w-2xl p-0 overflow-hidden border-none shadow-xl rounded-xl">
+            <div className="h-40 flex items-center justify-center bg-blue-50 border-b border-blue-100">
+              <Home className="w-16 h-16 text-blue-200" />
             </div>
-            <div className="p-6">
-              <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>{selectedHostel.description}</p>
+            <div className="p-8">
+              <DialogHeader className="mb-2">
+                <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">{selectedHostel.name}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm mb-6 text-muted-foreground leading-relaxed">{selectedHostel.description}</p>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="glass p-3">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Admin(s)</p>
-                  <p className="font-semibold text-sm">{selectedHostel.wardenName}</p>
-                </div>
-                <div className="glass p-3">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Contact</p>
-                  <p className="font-semibold text-sm">{selectedHostel.wardenPhone}</p>
-                </div>
-                <div className="glass p-3">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Total Rooms</p>
-                  <p className="font-semibold text-sm">{selectedHostel.totalRooms}</p>
-                </div>
-                <div className="glass p-3">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Occupancy</p>
-                  <p className="font-semibold text-sm">{selectedHostel.currentOccupancy} / {selectedHostel.capacity}</p>
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                  <CardContent className="p-4 flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-1.5 text-primary mb-1">
+                      <User className="w-4 h-4" />
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Admin</span>
+                    </div>
+                    <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenName}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                  <CardContent className="p-4 flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-1.5 text-primary mb-1">
+                      <Phone className="w-4 h-4" />
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Contact</span>
+                    </div>
+                    <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenPhone}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                  <CardContent className="p-4 flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-1.5 text-primary mb-1">
+                      <Hash className="w-4 h-4" />
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Rooms</span>
+                    </div>
+                    <p className="font-semibold text-sm text-foreground">{selectedHostel.totalRooms}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-50 border-none shadow-none rounded-lg">
+                  <CardContent className="p-4 flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-1.5 text-primary mb-1">
+                      <Users className="w-4 h-4" />
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Occupancy</span>
+                    </div>
+                    <p className="font-semibold text-sm text-foreground">{selectedHostel.currentOccupancy} / {selectedHostel.capacity}</p>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-2">📋 Hostel Rules</h4>
-                <ul className="space-y-2">
+              <div className="mb-8">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-foreground">
+                  <BookOpen className="w-4 h-4 text-primary" /> Hostel Rules
+                </h4>
+                <ul className="space-y-2 bg-slate-50 p-4 rounded-lg">
                   {selectedHostel.rules.map((rule, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                      <span className="mt-0.5">•</span>
-                      <span>{rule}</span>
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span className="leading-relaxed">{rule}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="flex gap-3">
-                <Link href="/signup" className="btn btn-primary flex-1">Apply Now</Link>
-                <button onClick={() => setSelectedHostel(null)} className="btn btn-secondary">Close</button>
+              <div className="flex justify-end gap-3 pt-6 border-t border-border">
+                <Button variant="ghost" onClick={() => setSelectedHostel(null)}>Cancel</Button>
+                <Link href="/signup">
+                  <Button className="gap-2 px-6">Apply Now <ArrowRight className="w-4 h-4" /></Button>
+                </Link>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
 
       {/* Footer */}
-      <footer className="border-t py-12 px-6" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            © 2024 HostelHub — Smart Hostel Management System. All rights reserved.
+      <footer className="border-t py-12 px-6 border-border mt-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-primary">
+            <div className="w-6 h-6 rounded flex items-center justify-center text-white bg-primary">
+              <Building2 className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold tracking-tight text-foreground">AUSHostel</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            © 2024 AUSHostel. All rights reserved.
           </p>
         </div>
       </footer>

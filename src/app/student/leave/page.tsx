@@ -2,6 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Plane, Plus, Calendar, FileText, CalendarClock, Home, XCircle, Info } from "lucide-react";
 
 interface Leave {
   id: string;
@@ -15,10 +22,15 @@ interface Leave {
   createdAt: string;
 }
 
-const STATUS_BADGES: Record<string, string> = {
-  PENDING: "badge-warning", APPROVED: "badge-success", REJECTED: "badge-danger",
-  ACTIVE: "badge-info", EXTENSION_REQUESTED: "badge-purple",
-  RETURN_REQUESTED: "badge-info", COMPLETED: "badge-success", CANCELLED: "badge-gray",
+const STATUS_BADGES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  PENDING: "secondary", 
+  APPROVED: "default", 
+  REJECTED: "destructive",
+  ACTIVE: "default", 
+  EXTENSION_REQUESTED: "secondary",
+  RETURN_REQUESTED: "default", 
+  COMPLETED: "outline", 
+  CANCELLED: "outline",
 };
 
 export default function StudentLeavePage() {
@@ -78,97 +90,152 @@ export default function StudentLeavePage() {
   const activeLeave = leaves.find((l) => ["PENDING", "APPROVED", "ACTIVE", "EXTENSION_REQUESTED", "RETURN_REQUESTED"].includes(l.status));
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}></div></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin border-primary"></div></div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">✈️ Leave Management</h1>
-        {!activeLeave && (
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Apply for Leave</button>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground">
+          <Plane className="w-6 h-6 text-primary" /> Leave Management
+        </h1>
+        {!activeLeave && !showForm && (
+          <Button onClick={() => setShowForm(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Apply for Leave
+          </Button>
         )}
       </div>
 
       {/* Apply Form */}
       {showForm && (
-        <div className="glass p-6 animate-fade-in">
-          <h2 className="font-bold mb-4">New Leave Request</h2>
-          {error && <div className="p-3 rounded-lg text-sm mb-4" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)' }}>{error}</div>}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div><label className="input-label">Start Date</label><input type="date" className="input" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></div>
-            <div><label className="input-label">End Date</label><input type="date" className="input" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></div>
-          </div>
-          <div className="mb-4"><label className="input-label">Reason</label><textarea className="input" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for leave..." style={{ resize: 'vertical' }} /></div>
-          <div className="flex gap-3">
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>{submitting ? "Submitting..." : "Submit Request"}</button>
-            <button className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-          </div>
-        </div>
+        <Card className="border-border shadow-sm animate-in slide-in-from-top-4 duration-300">
+          <CardHeader>
+            <CardTitle>New Leave Request</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <div className="p-3 rounded-lg text-sm bg-red-50 text-red-600 border border-red-100">{error}</div>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason</Label>
+              <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for leave..." className="resize-none" />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit Request"}
+              </Button>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Active Leave Card */}
       {activeLeave && (
-        <div className="glass p-6" style={{ borderLeftWidth: '4px', borderLeftColor: 'var(--color-primary)' }}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold">Active Leave</h3>
-            <span className={`badge ${STATUS_BADGES[activeLeave.status]}`}>{activeLeave.status.replace(/_/g, " ")}</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div className="glass p-3"><p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Period</p><p className="font-medium text-sm">{new Date(activeLeave.startDate).toLocaleDateString()} → {new Date(activeLeave.endDate).toLocaleDateString()}</p></div>
-            <div className="glass p-3"><p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Reason</p><p className="text-sm">{activeLeave.reason}</p></div>
-            {activeLeave.adminNotes && <div className="glass p-3"><p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Admin Notes</p><p className="text-sm">{activeLeave.adminNotes}</p></div>}
-          </div>
-
-          <div className="flex gap-3 flex-wrap">
-            {activeLeave.status === "PENDING" && (
-              <button className="btn btn-danger btn-sm" onClick={() => handleAction(activeLeave.id, "cancel")}>Cancel Request</button>
-            )}
-
-            {(activeLeave.status === "APPROVED" || activeLeave.status === "ACTIVE") && (
-              <>
-                <button className="btn btn-primary btn-sm" onClick={() => setExtLeaveId(activeLeave.id)}>📅 Request Extension</button>
-                <button className="btn btn-success btn-sm" onClick={() => handleAction(activeLeave.id, "request-return")}>🏠 Request Return Confirmation</button>
-              </>
-            )}
-          </div>
-
-          {/* Extension Form */}
-          {extLeaveId === activeLeave.id && (
-            <div className="mt-4 glass p-4 animate-fade-in">
-              <h4 className="font-bold text-sm mb-3">Request Extension</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <div><label className="input-label">New End Date</label><input type="date" className="input" value={extDate} onChange={(e) => setExtDate(e.target.value)} /></div>
-                <div><label className="input-label">Reason</label><input className="input" value={extReason} onChange={(e) => setExtReason(e.target.value)} placeholder="Reason for extension..." /></div>
-              </div>
-              <div className="flex gap-2">
-                <button className="btn btn-primary btn-sm" onClick={() => handleAction(activeLeave.id, "request-extension", { extensionReason: extReason, newEndDate: extDate })}>Submit Extension</button>
-                <button className="btn btn-secondary btn-sm" onClick={() => setExtLeaveId(null)}>Cancel</button>
-              </div>
+        <Card className="border-l-4 border-l-primary shadow-sm overflow-hidden">
+          <CardHeader className="bg-muted/30 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                Active Leave
+              </CardTitle>
+              <Badge variant={STATUS_BADGES[activeLeave.status]}>
+                {activeLeave.status.replace(/_/g, " ")}
+              </Badge>
             </div>
-          )}
-        </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase flex items-center gap-1"><Calendar className="w-3 h-3" /> Period</p>
+                <p className="font-medium text-sm text-foreground">{new Date(activeLeave.startDate).toLocaleDateString()} → {new Date(activeLeave.endDate).toLocaleDateString()}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase flex items-center gap-1"><FileText className="w-3 h-3" /> Reason</p>
+                <p className="text-sm text-foreground">{activeLeave.reason}</p>
+              </div>
+              {activeLeave.adminNotes && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase flex items-center gap-1"><Info className="w-3 h-3" /> Admin Notes</p>
+                  <p className="text-sm text-foreground">{activeLeave.adminNotes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 flex-wrap border-t border-border pt-4">
+              {activeLeave.status === "PENDING" && (
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => handleAction(activeLeave.id, "cancel")}>
+                  <XCircle className="w-4 h-4" /> Cancel Request
+                </Button>
+              )}
+
+              {(activeLeave.status === "APPROVED" || activeLeave.status === "ACTIVE") && (
+                <>
+                  <Button variant="secondary" size="sm" className="gap-2" onClick={() => setExtLeaveId(activeLeave.id)}>
+                    <CalendarClock className="w-4 h-4" /> Request Extension
+                  </Button>
+                  <Button size="sm" className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleAction(activeLeave.id, "request-return")}>
+                    <Home className="w-4 h-4" /> Request Return Confirmation
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Extension Form */}
+            {extLeaveId === activeLeave.id && (
+              <div className="mt-4 bg-muted/50 p-4 rounded-lg animate-in slide-in-from-top-2">
+                <h4 className="font-semibold text-sm mb-3 text-foreground">Request Extension</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-2">
+                    <Label>New End Date</Label>
+                    <Input type="date" value={extDate} onChange={(e) => setExtDate(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Reason</Label>
+                    <Input value={extReason} onChange={(e) => setExtReason(e.target.value)} placeholder="Reason for extension..." />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleAction(activeLeave.id, "request-extension", { extensionReason: extReason, newEndDate: extDate })}>Submit Extension</Button>
+                  <Button variant="outline" size="sm" onClick={() => setExtLeaveId(null)}>Cancel</Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Leave History */}
       <div>
-        <h2 className="font-bold mb-4">Leave History</h2>
+        <h2 className="font-bold mb-4 tracking-tight text-lg text-foreground">Leave History</h2>
         {leaves.length === 0 ? (
-          <div className="glass p-12 text-center"><p style={{ color: 'var(--color-text-muted)' }}>No leave requests yet</p></div>
+          <Card className="border-dashed bg-transparent border-border">
+            <CardContent className="p-12 text-center text-muted-foreground">
+              No leave requests yet
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
             {leaves.filter((l) => l !== activeLeave).map((leave) => (
-              <div key={leave.id} className="glass p-4">
-                <div className="flex items-center justify-between">
+              <Card key={leave.id} className="shadow-none border-border">
+                <CardContent className="p-4 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-sm">{leave.reason}</p>
-                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    <p className="font-medium text-sm text-foreground">{leave.reason}</p>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
                       {new Date(leave.startDate).toLocaleDateString()} → {new Date(leave.endDate).toLocaleDateString()}
                     </p>
                   </div>
-                  <span className={`badge ${STATUS_BADGES[leave.status]}`}>{leave.status}</span>
-                </div>
-              </div>
+                  <Badge variant={STATUS_BADGES[leave.status]}>{leave.status.replace(/_/g, " ")}</Badge>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}

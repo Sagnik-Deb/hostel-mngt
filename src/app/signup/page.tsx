@@ -4,6 +4,13 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Check, UploadCloud, FileText, X, Mail, CheckCircle2, ArrowRight, ArrowLeft, Building2 } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -13,7 +20,7 @@ interface Hostel {
 export default function SignupPage() {
   const { signup } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState(1); // 1: info, 2: hostel+docs, 3: OTP
+  const [step, setStep] = useState(1); // 1: info, 2: hostel+docs, 3: OTP, 4: Success
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +32,6 @@ export default function SignupPage() {
     hostelId: "", roommatePreference: "",
   });
 
-  // Allotment certificate upload state
   const [certFile, setCertFile] = useState<File | null>(null);
   const [certPreview, setCertPreview] = useState<string | null>(null);
   const [uploadingCert, setUploadingCert] = useState(false);
@@ -142,7 +148,7 @@ export default function SignupPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setStep(4); // success
+      setStep(4);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
@@ -151,237 +157,245 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, var(--color-bg) 50%, rgba(124,58,237,0.08) 100%)' }}>
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-20 right-10 w-72 h-72 rounded-full opacity-10 blur-3xl bg-blue-400"></div>
+      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full opacity-10 blur-3xl bg-primary"></div>
+
+      <div className="w-full max-w-lg relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl" style={{ background: 'var(--gradient-primary)' }}>H</div>
-            <span className="text-2xl font-bold">HostelHub</span>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-primary shadow-sm">H</div>
+            <span className="text-2xl font-bold tracking-tight text-foreground">AUSHostel</span>
           </Link>
-          <h1 className="text-2xl font-bold mb-2">Create Account</h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Register for hostel accommodation</p>
+          <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Create Account</h1>
+          <p className="text-sm text-muted-foreground">Register for hostel accommodation</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 px-2">
           {["Personal Info", "Hostel & Docs", "Verify Email", "Done"].map((label, i) => (
             <div key={i} className="flex-1 text-center">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-1 text-sm font-bold"
-                style={{
-                  background: step > i + 1 ? 'var(--color-success)' : step === i + 1 ? 'var(--gradient-primary)' : 'var(--color-surface-2)',
-                  color: step >= i + 1 ? 'white' : 'var(--color-text-muted)',
-                }}
+                className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold transition-colors ${step > i + 1
+                    ? "bg-emerald-500 text-white"
+                    : step === i + 1
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted text-muted-foreground"
+                  }`}
               >
-                {step > i + 1 ? "✓" : i + 1}
+                {step > i + 1 ? <Check className="w-4 h-4" /> : i + 1}
               </div>
-              <p className="text-xs" style={{ color: step === i + 1 ? 'var(--color-text)' : 'var(--color-text-muted)' }}>{label}</p>
+              <p className={`text-xs font-medium ${step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}>
+                {label}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Form */}
-        <div className="glass p-6">
-          {error && (
-            <div className="p-3 rounded-lg text-sm font-medium mb-4" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)' }}>
-              {error}
-            </div>
-          )}
+        <Card className="border-border shadow-sm">
+          <CardContent className="pt-6">
+            {error && (
+              <div className="p-3 rounded-lg text-sm font-medium mb-6 bg-red-50 text-red-600 border border-red-100">
+                {error}
+              </div>
+            )}
 
-          {/* Step 1: Personal Info */}
-          {step === 1 && (
-            <div className="space-y-4 animate-fade-in">
-              <div>
-                <label className="input-label">Full Name *</label>
-                <input name="name" className="input" placeholder="John Doe" value={form.name} onChange={handleChange} required id="signup-name" />
-              </div>
-              <div>
-                <label className="input-label">Email *</label>
-                <input name="email" type="email" className="input" placeholder="you@example.com" value={form.email} onChange={handleChange} required id="signup-email" />
-              </div>
-              <div>
-                <label className="input-label">Phone</label>
-                <input name="phone" className="input" placeholder="+91-XXXXXXXXXX" value={form.phone} onChange={handleChange} id="signup-phone" />
-              </div>
-              <div>
-                <label className="input-label">Password *</label>
-                <input name="password" type="password" className="input" placeholder="Min 6 characters" value={form.password} onChange={handleChange} required id="signup-password" />
-              </div>
-              <div>
-                <label className="input-label">Confirm Password *</label>
-                <input name="confirmPassword" type="password" className="input" placeholder="Re-enter password" value={form.confirmPassword} onChange={handleChange} required id="signup-confirm-password" />
-              </div>
-              <button onClick={handleStep1} className="btn btn-primary w-full btn-lg" id="signup-next-1">
-                Next → Hostel & Documents
-              </button>
-            </div>
-          )}
-
-          {/* Step 2: Hostel & Documents */}
-          {step === 2 && (
-            <div className="space-y-4 animate-fade-in">
-              <div>
-                <label className="input-label">Select Hostel *</label>
-                <select name="hostelId" className="input" value={form.hostelId} onChange={handleChange} required id="signup-hostel">
-                  <option value="">Choose your hostel</option>
-                  {hostels.map((h) => (
-                    <option key={h.id} value={h.id}>{h.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="input-label">Aadhar Number</label>
-                <input name="aadharNumber" className="input" placeholder="XXXX-XXXX-XXXX" value={form.aadharNumber} onChange={handleChange} id="signup-aadhar" />
-              </div>
-              <div>
-                <label className="input-label">College ID</label>
-                <input name="collegeIdUpload" className="input" placeholder="College ID number" value={form.collegeIdUpload} onChange={handleChange} id="signup-college-id" />
-              </div>
-              <div>
-                <label className="input-label">Roommate Preference</label>
-                <textarea
-                  name="roommatePreference"
-                  className="input"
-                  rows={3}
-                  placeholder="Any preferences for roommates? (optional)"
-                  value={form.roommatePreference}
-                  onChange={handleChange}
-                  id="signup-roommate"
-                  style={{ resize: 'vertical' }}
-                />
-              </div>
-
-              {/* Allotment Certificate Upload */}
-              <div>
-                <label className="input-label">
-                  Hostel Allotment Certificate
-                  <span style={{ color: 'var(--color-text-muted)', fontWeight: 400, fontSize: '0.75rem', marginLeft: '0.5rem' }}>(JPG/PNG/PDF, max 5 MB)</span>
-                </label>
-                <div
-                  id="cert-upload-zone"
-                  onClick={() => certInputRef.current?.click()}
-                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                    const dropped = e.dataTransfer.files[0];
-                    handleCertFileChange(dropped);
-                  }}
-                  style={{
-                    border: `2px dashed ${isDragging ? 'var(--color-primary)' : certFile ? 'var(--color-success)' : 'var(--color-border, rgba(255,255,255,0.15))'}`,
-                    borderRadius: '0.75rem',
-                    padding: '1.25rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: isDragging ? 'rgba(99,102,241,0.08)' : certFile ? 'rgba(16,185,129,0.06)' : 'var(--color-surface-2, rgba(255,255,255,0.04))',
-                  }}
-                >
-                  {certPreview && certPreview !== 'pdf' ? (
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img
-                        src={certPreview}
-                        alt="Certificate preview"
-                        style={{ maxHeight: '140px', maxWidth: '100%', borderRadius: '0.5rem', objectFit: 'contain' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
-                        style={{
-                          position: 'absolute', top: '-8px', right: '-8px',
-                          width: '22px', height: '22px', borderRadius: '50%',
-                          background: 'var(--color-danger, #ef4444)', color: 'white',
-                          border: 'none', cursor: 'pointer', fontSize: '0.75rem',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          lineHeight: 1,
-                        }}
-                        aria-label="Remove certificate"
-                      >✕</button>
-                    </div>
-                  ) : certPreview === 'pdf' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{ fontSize: '2rem' }}>📄</div>
-                      <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600 }}>{certFile?.name}</p>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
-                        style={{ fontSize: '0.75rem', color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                      >Remove</button>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)' }}>
-                      <div style={{ fontSize: '2rem' }}>🪪</div>
-                      <p style={{ margin: 0, fontSize: '0.875rem' }}>
-                        <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Click to upload</span> or drag &amp; drop
-                      </p>
-                      <p style={{ margin: 0, fontSize: '0.75rem' }}>Hostel allotment confirmation certificate</p>
-                    </div>
-                  )}
+            {/* Step 1: Personal Info */}
+            {step === 1 && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Full Name *</Label>
+                  <Input name="name" id="signup-name" placeholder="John Doe" value={form.name} onChange={handleChange} required />
                 </div>
-                <input
-                  ref={certInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,application/pdf"
-                  style={{ display: 'none' }}
-                  id="cert-file-input"
-                  onChange={(e) => handleCertFileChange(e.target.files?.[0] ?? null)}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email *</Label>
+                  <Input name="email" id="signup-email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Phone</Label>
+                  <Input name="phone" id="signup-phone" placeholder="+91-XXXXXXXXXX" value={form.phone} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password *</Label>
+                  <Input name="password" id="signup-password" type="password" placeholder="Min 6 characters" value={form.password} onChange={handleChange} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Confirm Password *</Label>
+                  <Input name="confirmPassword" id="signup-confirm-password" type="password" placeholder="Re-enter password" value={form.confirmPassword} onChange={handleChange} required />
+                </div>
+                <Button onClick={handleStep1} className="w-full mt-4 h-11 gap-2">
+                  Next Step <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
+            )}
 
-              <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className="btn btn-secondary flex-1">← Back</button>
-                <button onClick={handleStep2} className="btn btn-primary flex-1" disabled={loading || uploadingCert} id="signup-submit">
-                  {uploadingCert ? "Uploading certificate..." : loading ? "Submitting..." : "Submit & Verify Email"}
-                </button>
+            {/* Step 2: Hostel & Documents */}
+            {step === 2 && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-hostel">Select Hostel *</Label>
+                  <Select name="hostelId" value={form.hostelId} onValueChange={(v) => setForm({ ...form, hostelId: v })} required>
+                    <SelectTrigger id="signup-hostel">
+                      <SelectValue placeholder="Choose your hostel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hostels.map((h) => (
+                        <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-aadhar">Aadhar Number</Label>
+                  <Input name="aadharNumber" id="signup-aadhar" placeholder="XXXX-XXXX-XXXX" value={form.aadharNumber} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-college-id">College ID</Label>
+                  <Input name="collegeIdUpload" id="signup-college-id" placeholder="College ID number" value={form.collegeIdUpload} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-roommate">Roommate Preference</Label>
+                  <Textarea
+                    name="roommatePreference"
+                    id="signup-roommate"
+                    rows={3}
+                    placeholder="Any preferences for roommates? (optional)"
+                    value={form.roommatePreference}
+                    onChange={handleChange}
+                    className="resize-none"
+                  />
+                </div>
+
+                {/* Allotment Certificate Upload */}
+                <div className="space-y-2">
+                  <Label className="flex items-baseline gap-2">
+                    Hostel Allotment Certificate
+                    <span className="text-xs font-normal text-muted-foreground">(JPG/PNG/PDF, max 5 MB)</span>
+                  </Label>
+                  <div
+                    onClick={() => certInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      const dropped = e.dataTransfer.files[0];
+                      handleCertFileChange(dropped);
+                    }}
+                    className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${isDragging ? "border-primary bg-primary/5" : certFile ? "border-emerald-500 bg-emerald-50" : "border-border hover:bg-muted/50"
+                      }`}
+                  >
+                    {certPreview && certPreview !== "pdf" ? (
+                      <div className="relative inline-block">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={certPreview} alt="Preview" className="max-h-[140px] max-w-full rounded-md object-contain" />
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : certPreview === "pdf" ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="w-12 h-12 text-blue-500" />
+                        <p className="text-sm font-semibold truncate max-w-[200px]">{certFile?.name}</p>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setCertFile(null); setCertPreview(null); }}
+                          className="text-xs text-red-500 hover:underline"
+                        >
+                          Remove file
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <UploadCloud className="w-10 h-10 mb-1" />
+                        <p className="text-sm">
+                          <span className="font-semibold text-primary">Click to upload</span> or drag & drop
+                        </p>
+                        <p className="text-xs">Hostel allotment confirmation certificate</p>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={certInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                    className="hidden"
+                    onChange={(e) => handleCertFileChange(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 gap-2">
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </Button>
+                  <Button onClick={handleStep2} className="flex-1" disabled={loading || uploadingCert}>
+                    {uploadingCert ? "Uploading..." : loading ? "Submitting..." : "Submit"}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 3: OTP Verification */}
-          {step === 3 && (
-            <div className="space-y-4 animate-fade-in text-center">
-              <div className="text-5xl mb-4">📧</div>
-              <h3 className="text-lg font-bold">Check Your Email</h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                We&apos;ve sent a 6-digit OTP to <strong>{signupEmail}</strong>
-              </p>
-              <input
-                className="input text-center text-2xl tracking-widest"
-                placeholder="000000"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                id="signup-otp"
-              />
-              <button onClick={handleVerify} className="btn btn-primary w-full btn-lg" disabled={loading} id="signup-verify">
-                {loading ? "Verifying..." : "Verify Email"}
-              </button>
-              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                Note: If SMTP is not configured, check the server console for the OTP.
-              </p>
-            </div>
-          )}
+            {/* Step 3: OTP Verification */}
+            {step === 3 && (
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 text-center py-6">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">Check Your Email</h3>
+                  <p className="text-sm text-muted-foreground">
+                    We&apos;ve sent a 6-digit OTP to <strong className="text-foreground">{signupEmail}</strong>
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Input
+                    className="text-center text-3xl tracking-[0.5em] font-mono h-16 w-3/4 mx-auto"
+                    placeholder="000000"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  />
+                  <Button onClick={handleVerify} className="w-full h-11" disabled={loading}>
+                    {loading ? "Verifying..." : "Verify Email"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Note: If SMTP is not configured, check the server console for the OTP.
+                </p>
+              </div>
+            )}
 
-          {/* Step 4: Success */}
-          {step === 4 && (
-            <div className="text-center space-y-4 animate-fade-in py-8">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl" style={{ background: 'rgba(16,185,129,0.15)' }}>✅</div>
-              <h3 className="text-xl font-bold">Application Submitted!</h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                Your email has been verified successfully. Your application is now pending admin approval. You&apos;ll be notified once approved.
-              </p>
-              <Link href="/login" className="btn btn-primary btn-lg inline-flex">
-                Go to Login →
-              </Link>
-            </div>
-          )}
-        </div>
+            {/* Step 4: Success */}
+            {step === 4 && (
+              <div className="text-center space-y-6 animate-in fade-in zoom-in-95 duration-300 py-8">
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight text-foreground mb-2">Application Submitted!</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    Your email has been verified successfully. Your application is now pending admin approval. You&apos;ll be notified once approved.
+                  </p>
+                </div>
+                <Link href="/login" className="inline-block mt-4">
+                  <Button className="h-11 px-8 gap-2">
+                    Go to Login <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        <p className="text-center text-sm mt-6" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-center text-sm mt-8 text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold" style={{ color: 'var(--color-primary)' }}>
+          <Link href="/login" className="font-semibold text-primary hover:underline">
             Sign in here
           </Link>
         </p>

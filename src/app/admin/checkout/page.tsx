@@ -2,6 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DoorOpen, LogOut, Building, Clock, UserCheck, History } from "lucide-react";
 
 interface Student {
   id: string;
@@ -26,7 +32,6 @@ export default function CheckoutPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [pastStudents, setPastStudents] = useState<PastStudent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"active" | "past">("active");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchData = () => {
@@ -65,82 +70,144 @@ export default function CheckoutPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}></div>
+        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-2xl font-bold mb-1">🚪 Permanent Checkout</h1>
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground mb-1">
+          <DoorOpen className="w-6 h-6 text-primary" /> Permanent Checkout
+        </h1>
+        <p className="text-sm text-muted-foreground">
           Check out students who are permanently leaving the hostel
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 p-1 rounded-lg" style={{ background: 'var(--color-surface)', width: 'fit-content' }}>
-        <button className={`px-4 py-2 rounded-md text-sm font-semibold ${tab === "active" ? "text-white" : ""}`} style={tab === "active" ? { background: 'var(--gradient-primary)' } : { color: 'var(--color-text-muted)' }} onClick={() => setTab("active")}>Active Students</button>
-        <button className={`px-4 py-2 rounded-md text-sm font-semibold ${tab === "past" ? "text-white" : ""}`} style={tab === "past" ? { background: 'var(--gradient-primary)' } : { color: 'var(--color-text-muted)' }} onClick={() => setTab("past")}>Past Students</button>
-      </div>
-
-      {tab === "active" && (
-        <div className="glass overflow-hidden">
-          <table className="data-table">
-            <thead>
-              <tr><th>Student</th><th>Room</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.id}>
-                  <td>
-                    <div>
-                      <p className="font-medium text-sm">{s.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{s.email}</p>
-                    </div>
-                  </td>
-                  <td className="text-sm">{s.room?.number || "—"}</td>
-                  <td><span className={`badge ${s.status === "ACTIVE" ? "badge-success" : "badge-info"}`}>{s.status}</span></td>
-                  <td>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleCheckout(s.id, s.name)}
-                      disabled={actionLoading === s.id}
-                    >
-                      {actionLoading === s.id ? "..." : "🚪 Checkout"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === "past" && (
-        <div className="glass overflow-hidden">
-          <table className="data-table">
-            <thead>
-              <tr><th>Student</th><th>Email</th><th>Last Room</th><th>Checked Out</th></tr>
-            </thead>
-            <tbody>
-              {pastStudents.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-8" style={{ color: 'var(--color-text-muted)' }}>No past students</td></tr>
-              ) : (
-                pastStudents.map((s) => (
-                  <tr key={s.id}>
-                    <td className="font-medium text-sm">{s.name}</td>
-                    <td className="text-sm">{s.email}</td>
-                    <td className="text-sm">{s.roomNumber || "—"}</td>
-                    <td className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{new Date(s.checkedOutAt).toLocaleDateString()}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="active" className="gap-2"><UserCheck className="w-4 h-4" /> Active Students</TabsTrigger>
+          <TabsTrigger value="past" className="gap-2"><History className="w-4 h-4" /> Past Students</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="active">
+          <Card className="border-border shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="w-[300px]">Student</TableHead>
+                    <TableHead>Room</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {students.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shrink-0">
+                            {s.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm text-foreground truncate">{s.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{s.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {s.room ? (
+                          <span className="flex items-center gap-1.5 text-foreground">
+                            <Building className="w-3.5 h-3.5 text-muted-foreground" />
+                            {s.room.number}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground italic text-xs">Unassigned</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={s.status === "ACTIVE" ? "default" : s.status === "ON_LEAVE" ? "secondary" : "destructive"} 
+                               className={s.status === "ACTIVE" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""}>
+                          {s.status.replace(/_/g, " ")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => handleCheckout(s.id, s.name)}
+                          disabled={actionLoading === s.id}
+                        >
+                          {actionLoading === s.id ? "Processing..." : <><LogOut className="w-4 h-4" /> Checkout</>}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {students.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                        No active students found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="past">
+          <Card className="border-border shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="w-[300px]">Student</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Last Room</TableHead>
+                    <TableHead className="text-right">Checked Out</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pastStudents.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium text-foreground">{s.name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{s.email}</TableCell>
+                      <TableCell className="text-sm">
+                        {s.roomNumber ? (
+                          <span className="flex items-center gap-1.5 text-foreground">
+                            <Building className="w-3.5 h-3.5 text-muted-foreground" />
+                            {s.roomNumber}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground italic text-xs">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="flex items-center justify-end gap-1.5 text-sm text-muted-foreground whitespace-nowrap">
+                          <Clock className="w-3.5 h-3.5" />
+                          {new Date(s.checkedOutAt).toLocaleDateString()}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {pastStudents.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                        No past students found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

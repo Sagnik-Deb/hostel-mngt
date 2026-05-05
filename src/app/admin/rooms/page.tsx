@@ -2,6 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Plus, Trash2, Users, Phone, CreditCard, FileText, DoorOpen, LogOut, ArrowRightCircle, Clock, Mail } from "lucide-react";
 
 interface Occupant {
   id: string;
@@ -148,10 +156,10 @@ export default function RoomsPage() {
   const floors = [...new Set(rooms.map((r) => r.floor))].sort();
   const filteredRooms = filterFloor === "all" ? rooms : rooms.filter((r) => r.floor === filterFloor);
 
-  const getRoomClass = (room: Room) => {
-    if (room.occupied >= room.capacity) return "room-full";
-    if (room.occupied > 0) return "room-partial";
-    return "room-empty";
+  const getRoomColor = (room: Room) => {
+    if (room.occupied >= room.capacity) return "bg-red-50 hover:bg-red-100 border-red-200 text-red-900";
+    if (room.occupied > 0) return "bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900";
+    return "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-900";
   };
 
   const getStatusEmoji = (room: Room) => {
@@ -163,313 +171,313 @@ export default function RoomsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}></div>
+        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin border-primary"></div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold mb-1">🏢 Room Grid</h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Airplane seating view — click a room for details</p>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground mb-1">
+            <Building2 className="w-6 h-6 text-primary" /> Room Grid
+          </h1>
+          <p className="text-sm text-muted-foreground">Airplane seating view — click a room for details</p>
         </div>
-        <div className="flex items-center gap-4">
-          <button 
-            className="btn btn-primary"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <span>+ Add Room</span>
-          </button>
-          <div className="flex items-center gap-2 text-xs">
-            <span>🟢 Empty</span>
-            <span>🟡 Partial</span>
-            <span>🔴 Full</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 text-xs bg-muted/50 px-3 py-2 rounded-lg border border-border">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Empty</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Partial</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500"></span> Full</span>
           </div>
-          <select
-            className="input"
-            style={{ width: 'auto' }}
-            value={filterFloor === "all" ? "all" : filterFloor}
-            onChange={(e) => setFilterFloor(e.target.value === "all" ? "all" : Number(e.target.value))}
+          <Select 
+            value={filterFloor === "all" ? "all" : filterFloor.toString()} 
+            onValueChange={(v) => setFilterFloor(v === "all" ? "all" : Number(v))}
           >
-            <option value="all">All Floors</option>
-            {floors.map((f) => (
-              <option key={f} value={f}>Floor {f}</option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="All Floors" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Floors</SelectItem>
+              {floors.map((f) => (
+                <SelectItem key={f} value={f.toString()}>Floor {f}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Room
+          </Button>
         </div>
       </div>
 
       {/* Room Grid */}
-      {floors.filter((f) => filterFloor === "all" || f === filterFloor).map((floor) => (
-        <div key={floor} className="glass p-5">
-          <h3 className="font-bold text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>
-            Floor {floor}
-          </h3>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
-            {filteredRooms
-              .filter((r) => r.floor === floor)
-              .map((room) => (
-                <button
-                  key={room.id}
-                  className={`${getRoomClass(room)} p-3 rounded-lg border cursor-pointer transition-all hover:scale-105 text-center`}
-                  onClick={() => setSelectedRoom(room)}
-                  title={`Room ${room.number} - ${room.roomType} (${room.occupied}/${room.capacity})`}
-                >
-                  <div className="text-xs font-bold">{room.number}</div>
-                  <div className="text-lg">{getStatusEmoji(room)}</div>
-                  <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    {room.occupied}/{room.capacity}
-                  </div>
-                </button>
-              ))}
-          </div>
-        </div>
-      ))}
+      <div className="space-y-6">
+        {floors.filter((f) => filterFloor === "all" || f === filterFloor).map((floor) => (
+          <Card key={floor} className="border-border shadow-sm">
+            <CardHeader className="pb-4 bg-muted/30 border-b border-border">
+              <CardTitle className="text-lg text-muted-foreground">Floor {floor}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                {filteredRooms
+                  .filter((r) => r.floor === floor)
+                  .map((room) => (
+                    <button
+                      key={room.id}
+                      className={`p-3 rounded-xl border-2 transition-all hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${getRoomColor(room)}`}
+                      onClick={() => setSelectedRoom(room)}
+                      title={`Room ${room.number} - ${room.roomType} (${room.occupied}/${room.capacity})`}
+                    >
+                      <div className="text-xs font-bold tracking-tight">{room.number}</div>
+                      <div className="text-lg drop-shadow-sm">{getStatusEmoji(room)}</div>
+                      <div className="text-[10px] font-semibold opacity-70">
+                        {room.occupied}/{room.capacity}
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Room Detail Modal */}
-      {selectedRoom && (
-        <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+      {/* Room Detail Dialog */}
+      <Dialog open={!!selectedRoom} onOpenChange={(open) => !open && setSelectedRoom(null)}>
+        {selectedRoom && (
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold">Room {selectedRoom.number}</h2>
-                  <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                  <DialogTitle className="text-2xl font-bold">Room {selectedRoom.number}</DialogTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Floor {selectedRoom.floor} • {selectedRoom.roomType}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    style={{ color: 'var(--color-danger)', fontSize: '11px', padding: '4px 8px' }}
-                    onClick={() => handleDeleteRoom(selectedRoom.id, selectedRoom.number)}
-                  >
-                    Delete Room
-                  </button>
-                  <button onClick={() => setSelectedRoom(null)} className="text-2xl" style={{ color: 'var(--color-text-muted)' }}>×</button>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  className="gap-1.5 h-8 text-xs"
+                  onClick={() => handleDeleteRoom(selectedRoom.id, selectedRoom.number)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </Button>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-muted/50 p-3 rounded-xl text-center border border-border">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Capacity</p>
+                  <p className="text-2xl font-bold text-foreground">{selectedRoom.capacity}</p>
+                </div>
+                <div className="bg-amber-50 p-3 rounded-xl text-center border border-amber-100">
+                  <p className="text-xs text-amber-700 font-medium uppercase tracking-wider mb-1">Occupied</p>
+                  <p className="text-2xl font-bold text-amber-600">{selectedRoom.occupied}</p>
+                </div>
+                <div className="bg-emerald-50 p-3 rounded-xl text-center border border-emerald-100">
+                  <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider mb-1">Available</p>
+                  <p className="text-2xl font-bold text-emerald-600">{selectedRoom.capacity - selectedRoom.occupied}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="glass p-3 text-center">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Capacity</p>
-                  <p className="text-lg font-bold">{selectedRoom.capacity}</p>
-                </div>
-                <div className="glass p-3 text-center">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Occupied</p>
-                  <p className="text-lg font-bold">{selectedRoom.occupied}</p>
-                </div>
-                <div className="glass p-3 text-center">
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Available</p>
-                  <p className="text-lg font-bold">{selectedRoom.capacity - selectedRoom.occupied}</p>
-                </div>
-              </div>
-
-              <h3 className="font-bold text-sm mb-3">👥 Occupants</h3>
-              {selectedRoom.occupants.length === 0 ? (
-                <p className="text-sm py-4 text-center" style={{ color: 'var(--color-text-muted)' }}>No occupants</p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedRoom.occupants.map((o) => (
-                    <div 
-                      key={o.id} 
-                      className="glass p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
-                      onClick={() => {
-                        setSelectedStudent(o);
-                        setIsStudentModalOpen(true);
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ background: 'var(--gradient-aurora)' }}>
-                          {o.profileImage ? (
-                            <img src={o.profileImage} alt={o.name} className="w-full h-full object-cover rounded-lg" />
-                          ) : (
-                            o.name.charAt(0)
-                          )}
+              <div>
+                <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Users className="w-4 h-4 text-primary" /> Occupants
+                </h3>
+                {selectedRoom.occupants.length === 0 ? (
+                  <div className="bg-muted/30 border border-dashed border-border rounded-xl p-8 text-center">
+                    <p className="text-sm text-muted-foreground">No occupants currently in this room.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedRoom.occupants.map((o) => (
+                      <div 
+                        key={o.id} 
+                        className="bg-background border border-border p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all"
+                        onClick={() => {
+                          setSelectedStudent(o);
+                          setIsStudentModalOpen(true);
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shrink-0 overflow-hidden">
+                            {o.profileImage ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={o.profileImage} alt={o.name} className="w-full h-full object-cover" />
+                            ) : (
+                              o.name.charAt(0).toUpperCase()
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{o.name}</p>
+                            <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-[200px]">{o.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">{o.name}</p>
-                          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{o.email}</p>
-                        </div>
+                        <Badge variant={o.status === "ACTIVE" ? "default" : o.status === "ON_LEAVE" ? "secondary" : "destructive"}
+                               className={o.status === "ACTIVE" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""}>
+                          {o.status.replace(/_/g, " ")}
+                        </Badge>
                       </div>
-                      <span className={`badge ${o.status === "ACTIVE" ? "badge-success" : o.status === "ON_LEAVE" ? "badge-info" : "badge-warning"}`}>
-                        {o.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Room Modal */}
-      {isCreateModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsCreateModalOpen(false)}>
-          <div className="modal-content max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Add New Room</h2>
-                <button onClick={() => setIsCreateModalOpen(false)} className="text-2xl" style={{ color: 'var(--color-text-muted)' }}>×</button>
-              </div>
-
-              <form onSubmit={handleCreateRoom} className="space-y-4">
-                {formError && (
-                  <div className="p-3 rounded-lg text-xs font-medium" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-danger)' }}>
-                    {formError}
+                    ))}
                   </div>
                 )}
-
-                <div>
-                  <label className="input-label">Room Number</label>
-                  <input 
-                    type="text" 
-                    className="input" 
-                    placeholder="e.g., 101"
-                    value={newRoom.number}
-                    onChange={(e) => setNewRoom({...newRoom, number: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="input-label">Floor</label>
-                  <input 
-                    type="number" 
-                    className="input" 
-                    placeholder="e.g., 1"
-                    min="1"
-                    value={newRoom.floor}
-                    onChange={(e) => setNewRoom({...newRoom, floor: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="input-label">Room Type</label>
-                  <select 
-                    className="input"
-                    value={newRoom.roomType}
-                    onChange={(e) => {
-                      const type = e.target.value;
-                      const cap = type === "Single" ? "1" : type === "Double Sharing" ? "2" : "3";
-                      setNewRoom({...newRoom, roomType: type, capacity: cap});
-                    }}
-                  >
-                    <option value="Single">Single</option>
-                    <option value="Double Sharing">Double Sharing</option>
-                    <option value="Triple Sharing">Triple Sharing</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="input-label">Capacity (Auto-set)</label>
-                  <input 
-                    type="number" 
-                    className="input" 
-                    value={newRoom.capacity}
-                    disabled
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Creating..." : "Create Room"}
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </DialogContent>
+        )}
+      </Dialog>
+
+      {/* Add Room Dialog */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Room</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateRoom} className="space-y-4 py-4">
+            {formError && (
+              <div className="p-3 rounded-lg text-sm bg-red-50 text-red-600 border border-red-100 font-medium">
+                {formError}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Room Number</Label>
+              <Input 
+                placeholder="e.g., 101"
+                value={newRoom.number}
+                onChange={(e) => setNewRoom({...newRoom, number: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Floor</Label>
+              <Input 
+                type="number" 
+                placeholder="e.g., 1"
+                min="1"
+                value={newRoom.floor}
+                onChange={(e) => setNewRoom({...newRoom, floor: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Room Type</Label>
+              <Select 
+                value={newRoom.roomType}
+                onValueChange={(type) => {
+                  const cap = type === "Single" ? "1" : type === "Double Sharing" ? "2" : "3";
+                  setNewRoom({...newRoom, roomType: type, capacity: cap});
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Double Sharing">Double Sharing</SelectItem>
+                  <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Capacity (Auto-set)</Label>
+              <Input type="number" value={newRoom.capacity} disabled className="bg-muted/50" />
+            </div>
+            <div className="pt-4 flex gap-3">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Room"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Student Detail Modal */}
-      {isStudentModalOpen && selectedStudent && (
-        <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setIsStudentModalOpen(false)}>
-          <div className="modal-content glass p-0 max-w-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Modal Header */}
-            <div className="p-6 pb-0 flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl" style={{ background: 'var(--gradient-aurora)' }}>
+      <Dialog open={isStudentModalOpen} onOpenChange={setIsStudentModalOpen}>
+        {selectedStudent && (
+          <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden" style={{ zIndex: 110 }}>
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 pb-8 border-b border-border">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white font-bold text-3xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md shrink-0 overflow-hidden">
                   {selectedStudent.profileImage ? (
-                    <img src={selectedStudent.profileImage} alt={selectedStudent.name} className="w-full h-full object-cover rounded-2xl" />
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={selectedStudent.profileImage} alt={selectedStudent.name} className="w-full h-full object-cover" />
                   ) : (
-                    selectedStudent.name.charAt(0)
+                    selectedStudent.name.charAt(0).toUpperCase()
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{selectedStudent.name}</h2>
-                  <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{selectedStudent.email}</p>
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">{selectedStudent.name}</h2>
+                  <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 mt-1">
+                    <Mail className="w-3.5 h-3.5" /> {selectedStudent.email}
+                  </p>
                 </div>
               </div>
-              <button 
-                className="btn btn-secondary p-2 min-w-0 leading-none hover:bg-white/10" 
-                onClick={() => setIsStudentModalOpen(false)}
-              >
-                ✕
-              </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-5">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">Phone Number</label>
-                    <p className="font-medium">{selectedStudent.phone || "Not provided"}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5" /> Phone Number
+                    </p>
+                    <p className="font-medium text-foreground">{selectedStudent.phone || "Not provided"}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">Aadhar Number</label>
-                    <p className="font-medium">{selectedStudent.aadharNumber || "Not provided"}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5" /> Aadhar Number
+                    </p>
+                    <p className="font-medium text-foreground">{selectedStudent.aadharNumber || "Not provided"}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">College ID</label>
-                    <p className="font-medium">{selectedStudent.collegeId || "Not provided"}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" /> College ID
+                    </p>
+                    <p className="font-medium text-foreground">{selectedStudent.collegeId || "Not provided"}</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">Room Details</label>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <DoorOpen className="w-3.5 h-3.5" /> Room Details
+                    </p>
                     {selectedRoom ? (
-                      <div className="glass p-3 rounded-lg border border-white/5">
-                        <p className="font-bold text-sm">Room {selectedRoom.number}</p>
-                        <p className="text-xs text-muted">Floor {selectedRoom.floor} • {selectedRoom.roomType}</p>
-                        <p className="text-[10px] mt-1 text-muted">Bed Number: {selectedStudent.bedNumber}</p>
+                      <div className="bg-muted/30 p-3 rounded-xl border border-border/50">
+                        <p className="font-semibold text-sm text-foreground">Room {selectedRoom.number}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Floor {selectedRoom.floor} • {selectedRoom.roomType}</p>
+                        <p className="text-[10px] font-medium mt-1.5 text-primary">Bed Number: {selectedStudent.bedNumber}</p>
                       </div>
                     ) : (
-                      <p className="font-medium text-amber-500">Unassigned</p>
+                      <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Unassigned</Badge>
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">Account Status</label>
-                    <span className={`badge ${selectedStudent.status === "ACTIVE" ? "badge-success" : selectedStudent.status === "ON_LEAVE" ? "badge-info" : "badge-warning"}`}>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <ArrowRightCircle className="w-3.5 h-3.5" /> Account Status
+                    </p>
+                    <Badge variant={selectedStudent.status === "ACTIVE" ? "default" : selectedStudent.status === "ON_LEAVE" ? "secondary" : "destructive"}
+                           className={selectedStudent.status === "ACTIVE" ? "bg-emerald-500 hover:bg-emerald-600" : ""}>
                       {selectedStudent.status}
-                    </span>
+                    </Badge>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider mb-1 block text-muted">Joined Date</label>
-                    <p className="font-medium">{new Date(selectedStudent.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" /> Joined Date
+                    </p>
+                    <p className="font-medium text-foreground">{new Date(selectedStudent.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 bg-white/5 flex justify-end gap-3">
-              <button className="btn btn-secondary" onClick={() => setIsStudentModalOpen(false)}>Close</button>
-              <button 
-                className="btn btn-primary" 
-                style={{ background: 'var(--color-danger)' }}
+            <DialogFooter className="p-4 bg-muted/20 border-t border-border flex justify-end gap-3 sm:gap-3">
+              <Button variant="outline" onClick={() => setIsStudentModalOpen(false)}>Close</Button>
+              <Button 
+                variant="destructive"
+                className="gap-2"
                 disabled={processingId === selectedStudent.id}
                 onClick={() => {
                   handleStudentCheckout(selectedStudent.id, selectedStudent.name).then(() => {
@@ -478,12 +486,12 @@ export default function RoomsPage() {
                   });
                 }}
               >
-                {processingId === selectedStudent.id ? "..." : "Checkout Student"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+                {processingId === selectedStudent.id ? "Processing..." : <><LogOut className="w-4 h-4" /> Checkout Student</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
+    </div>
   );
 }
