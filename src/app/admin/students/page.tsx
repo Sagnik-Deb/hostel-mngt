@@ -16,6 +16,7 @@ interface Student {
   email: string;
   phone: string;
   status: string;
+  studentType: "PERMANENT" | "GUEST";
   aadharNumber: string | null;
   collegeId: string | null;
   profileImage: string | null;
@@ -141,7 +142,19 @@ export default function StudentsPage() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">{s.name}</p>
+                        <p className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors flex items-center gap-1.5">
+                          {s.name}
+                          <span
+                            title={s.studentType === "PERMANENT" ? "Permanent" : "Guest"}
+                            className={`shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
+                              s.studentType === "GUEST"
+                                ? "bg-amber-100 text-amber-700 border border-amber-300"
+                                : "bg-blue-100 text-blue-700 border border-blue-200"
+                            }`}
+                          >
+                            {s.studentType === "PERMANENT" ? "P" : "G"}
+                          </span>
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">{s.email}</p>
                       </div>
                     </div>
@@ -242,6 +255,21 @@ export default function StudentsPage() {
                       <FileText className="w-3.5 h-3.5" /> College ID
                     </p>
                     <p className="font-medium text-foreground">{selectedStudent.collegeId || "Not provided"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                      Student Type
+                    </p>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      selectedStudent.studentType === "GUEST"
+                        ? "bg-amber-100 text-amber-700 border border-amber-300"
+                        : "bg-blue-100 text-blue-700 border border-blue-200"
+                    }`}>
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold bg-current/20">
+                        {selectedStudent.studentType === "PERMANENT" ? "P" : "G"}
+                      </span>
+                      {selectedStudent.studentType === "PERMANENT" ? "Permanent" : "Guest"}
+                    </span>
                   </div>
                 </div>
 

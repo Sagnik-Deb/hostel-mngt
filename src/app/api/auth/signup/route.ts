@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       hostelId,
       roommatePreference,
       roommateQuestionnaire,
+      studentType,
     } = body;
 
     // Validate required fields
@@ -78,6 +79,7 @@ export async function POST(request: NextRequest) {
         collegeIdUpload,
         allotmentCertificate,
         hostelId,
+        studentType: studentType === "GUEST" ? "GUEST" : "PERMANENT",
         roommatePreference,
         roommateQuestionnaire: roommateQuestionnaire || undefined,
       },

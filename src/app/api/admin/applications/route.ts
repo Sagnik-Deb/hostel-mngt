@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
           hostelId: application.hostelId,
           role: "STUDENT",
           status: "ACTIVE",
+          studentType: application.studentType,
           roomId: roomId || null,
           bedNumber: bedNumber || null,
         },

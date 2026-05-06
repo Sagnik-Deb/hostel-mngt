@@ -29,7 +29,7 @@ export default function SignupPage() {
   const [form, setForm] = useState({
     name: "", email: "", password: "", confirmPassword: "",
     phone: "", aadharNumber: "", collegeIdUpload: "",
-    hostelId: "", roommatePreference: "",
+    hostelId: "", roommatePreference: "", studentType: "PERMANENT" as "PERMANENT" | "GUEST",
   });
 
   const [certFile, setCertFile] = useState<File | null>(null);
@@ -120,6 +120,7 @@ export default function SignupPage() {
         collegeIdUpload: form.collegeIdUpload,
         hostelId: form.hostelId,
         roommatePreference: form.roommatePreference,
+        studentType: form.studentType,
         allotmentCertificate: allotmentCertificateUrl || undefined,
       });
       setSignupEmail(result.email);
@@ -246,6 +247,33 @@ export default function SignupPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Student Type *</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(["PERMANENT", "GUEST"] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setForm({ ...form, studentType: type })}
+                        className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all ${
+                          form.studentType === type
+                            ? "border-primary bg-primary/5 text-primary shadow-sm"
+                            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        }`}
+                      >
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                          form.studentType === type ? "border-primary bg-primary text-white" : "border-muted-foreground"
+                        }`}>
+                          {type === "PERMANENT" ? "P" : "G"}
+                        </span>
+                        {type === "PERMANENT" ? "Permanent" : "Guest"}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {form.studentType === "PERMANENT" ? "Long-term resident student" : "Short-term / visiting student"}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-aadhar">Aadhar Number</Label>

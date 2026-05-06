@@ -28,6 +28,11 @@ enum AdminApprovalState {
   REVOKED
 }
 
+enum StudentType {
+  PERMANENT
+  GUEST
+}
+
 enum LeaveStatus {
   PENDING
   APPROVED
@@ -151,6 +156,7 @@ model User {
   role          Role               @default(STUDENT)
   status        UserStatus         @default(ACTIVE)
   adminState    AdminApprovalState @default(APPROVED)
+  studentType   StudentType        @default(PERMANENT)
   hostelId      String
   roomId        String?
   bedNumber     Int?
@@ -169,20 +175,21 @@ model User {
 }
 
 model Application {
-  id                    String   @id @default(cuid())
-  email                 String   @unique
+  id                    String      @id @default(cuid())
+  email                 String      @unique
   password              String
   name                  String
   phone                 String?
   aadharNumber          String?
-  collegeIdUpload          String?
-  allotmentCertificate     String?
+  collegeIdUpload       String?
+  allotmentCertificate  String?
   hostelId              String
-  emailVerified         Boolean  @default(false)
+  studentType           StudentType @default(PERMANENT)
+  emailVerified         Boolean     @default(false)
   roommatePreference    String?
   roommateQuestionnaire Json?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
   hostel Hostel @relation(fields: [hostelId], references: [id])
 
