@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import "@/lib/cloudinary"; // ensures cloudinary.config() is called
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -30,17 +30,26 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const isPdf = file.type === "application/pdf";
 
-    // Build a unique filename
-    const ext = file.name.split(".").pop();
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    // Upload to Cloudinary — use resource_type "auto" to handle both images & PDFs
+    const result = await new Promise<{ secure_url: string; resource_type: string }>(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "student-documents", resource_type: "auto" },
+          (error, res) => {
+            if (error || !res) reject(error || new Error("Cloudinary upload failed"));
+            else resolve({ secure_url: res.secure_url, resource_type: res.resource_type });
+          }
+        );
+        stream.end(buffer);
+      }
+    );
 
-    await mkdir(uploadsDir, { recursive: true });
-    await writeFile(path.join(uploadsDir, uniqueName), buffer);
-
-    const url = `/uploads/${uniqueName}`;
-    return NextResponse.json({ success: true, url }, { status: 201 });
+    return NextResponse.json(
+      { success: true, url: result.secure_url, resourceType: result.resource_type, isPdf },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ success: false, error: "Upload failed" }, { status: 500 });

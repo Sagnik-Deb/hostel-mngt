@@ -214,7 +214,9 @@ export default function ApplicationsPage() {
                 <div className="space-y-3">
                   <Label className="text-xs font-medium text-muted-foreground uppercase">Allotment Certificate</Label>
                   <div className="rounded-xl overflow-hidden border border-border bg-muted/10 p-2 flex justify-center">
-                    {selectedApp.allotmentCertificate.endsWith('.pdf') ? (
+                    {/* PDF: legacy .pdf extension OR Cloudinary raw upload URL */}
+                    {(selectedApp.allotmentCertificate.endsWith('.pdf') ||
+                      selectedApp.allotmentCertificate.includes('/raw/upload/')) ? (
                       <a href={selectedApp.allotmentCertificate} target="_blank" rel="noopener noreferrer" className="w-full">
                         <Button variant="outline" className="w-full h-12 gap-2 bg-background hover:bg-muted/50">
                           <FileText className="w-5 h-5 text-blue-500" /> View PDF Certificate
