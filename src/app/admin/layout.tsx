@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import DashboardShell from "@/components/layout/DashboardShell";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, Building2, FileText, Users, Plane, MessageSquareWarning, UtensilsCrossed, Shield, DoorOpen, Bell } from "lucide-react";
+import { LayoutDashboard, Building2, FileText, Users, Plane, MessageSquareWarning, UtensilsCrossed, Shield, DoorOpen, Bell, Globe } from "lucide-react";
 
 const adminLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,6 +18,7 @@ const adminLinks = [
   { href: "/admin/admin-mgmt", label: "Admin Mgmt", icon: Shield },
   { href: "/admin/checkout", label: "Checkout", icon: DoorOpen },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
+  { href: "/admin/hostel-overview", label: "Hostel Overview", icon: Globe },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

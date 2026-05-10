@@ -4,9 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plane, Bell, Home, User, Users, Phone, Hash, ArrowRight, Sparkles, BookOpen } from "lucide-react";
+import { Building2, Plane, Bell, Home, User, Users, ArrowRight, Sparkles } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -26,7 +25,6 @@ interface Hostel {
 export default function HomePage() {
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedHostel, setSelectedHostel] = useState<Hostel | null>(null);
 
   useEffect(() => {
     fetch("/api/hostels")
@@ -121,121 +119,35 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {hostels.map((hostel, i) => (
-              <Card
+              <Link
                 key={hostel.id}
-                className="cursor-pointer overflow-hidden hover:shadow-md hover:border-primary/40 transition-all border-border"
+                href={`/hostels/${hostel.code.toLowerCase()}`}
+                className="block group"
                 style={{ animationDelay: `${i * 50}ms` }}
-                onClick={() => setSelectedHostel(hostel)}
               >
-                <div className="aspect-video w-full flex items-center justify-center bg-blue-50/50 border-b border-border/50 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20"></div>
-                  <Home className="w-12 h-12 text-blue-500 relative z-10 opacity-50" />
-                </div>
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
-                  <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
-                      <User className="w-3.5 h-3.5" /> {hostel.wardenName}
-                    </span>
-                    <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border-none">
-                      {hostel.currentOccupancy}/{hostel.capacity}
-                    </Badge>
+                <Card className="overflow-hidden h-full hover:shadow-md hover:border-primary/40 transition-all border-border">
+                  <div className="aspect-video w-full flex items-center justify-center bg-blue-50/50 border-b border-border/50 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    <Home className="w-12 h-12 text-blue-500 relative z-10 opacity-50" />
                   </div>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-5">
+                    <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
+                    <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                        <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.capacity}
+                      </span>
+                      <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border-none gap-1">
+                        View <ArrowRight className="w-3 h-3" />
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
       </section>
-
-      {/* Hostel Detail Modal */}
-      <Dialog open={!!selectedHostel} onOpenChange={(open) => !open && setSelectedHostel(null)}>
-        {selectedHostel && (
-          <DialogContent className="sm:max-w-4xl md:max-w-4xl p-0 overflow-hidden border-none shadow-xl rounded-xl flex flex-col md:flex-row h-[90vh] md:h-[600px]">
-            <div className="w-full md:w-2/5 h-48 md:h-full flex flex-col items-center justify-center bg-blue-50 border-b md:border-b-0 md:border-r border-blue-100 relative overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-30"></div>
-              <Home className="w-16 h-16 text-blue-500 relative z-10 opacity-50 mb-4" />
-              <div className="relative z-10 text-center px-6 hidden md:block">
-                <h3 className="text-xl font-bold text-blue-900 mb-2">{selectedHostel.name}</h3>
-                <Badge variant="secondary" className="bg-white/80 text-blue-700 hover:bg-white border-none">
-                  {selectedHostel.currentOccupancy}/{selectedHostel.capacity} Occupied
-                </Badge>
-              </div>
-            </div>
-            <div className="w-full md:w-3/5 flex flex-col h-full overflow-hidden">
-              <div className="p-8 overflow-y-auto flex-1">
-                <DialogHeader className="mb-2 md:hidden">
-                  <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">{selectedHostel.name}</DialogTitle>
-                </DialogHeader>
-                <div className="hidden md:block mb-2">
-                  <h2 className="text-2xl font-bold tracking-tight text-foreground">Overview</h2>
-                </div>
-                <p className="text-sm mb-6 text-muted-foreground leading-relaxed">{selectedHostel.description}</p>
-
-                <div className="grid grid-cols-2 gap-3 mb-8">
-                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                    <CardContent className="p-4 flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-1.5 text-primary mb-1">
-                        <User className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Admin</span>
-                      </div>
-                      <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenName}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                    <CardContent className="p-4 flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-1.5 text-primary mb-1">
-                        <Phone className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Contact</span>
-                      </div>
-                      <p className="font-semibold text-sm truncate w-full text-foreground">{selectedHostel.wardenPhone}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                    <CardContent className="p-4 flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-1.5 text-primary mb-1">
-                        <Hash className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Rooms</span>
-                      </div>
-                      <p className="font-semibold text-sm text-foreground">{selectedHostel.totalRooms}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-slate-50 border-none shadow-none rounded-lg">
-                    <CardContent className="p-4 flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-1.5 text-primary mb-1">
-                        <Users className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Occupancy</span>
-                      </div>
-                      <p className="font-semibold text-sm text-foreground">{selectedHostel.currentOccupancy} / {selectedHostel.capacity}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="mb-2">
-                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-foreground">
-                    <BookOpen className="w-4 h-4 text-primary" /> Hostel Rules
-                  </h4>
-                  <ul className="space-y-2 bg-slate-50 p-4 rounded-lg">
-                    {selectedHostel.rules.map((rule, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <span className="text-primary mt-0.5">•</span>
-                        <span className="leading-relaxed">{rule}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 p-6 border-t border-border bg-background mt-auto shrink-0">
-                <Button variant="ghost" onClick={() => setSelectedHostel(null)}>Cancel</Button>
-                <Link href="/signup">
-                  <Button className="gap-2 px-6">Apply Now <ArrowRight className="w-4 h-4" /></Button>
-                </Link>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 px-6 border-border mt-10">
