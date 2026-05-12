@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Check, Mail, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, ShieldAlert, PartyPopper } from "lucide-react";
+import { Check, Mail, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, ShieldAlert, PartyPopper, Eye, EyeOff } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -22,6 +22,8 @@ export default function AdminSignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [signupEmail, setSignupEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -188,11 +190,21 @@ export default function AdminSignupPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin-signup-password">Password *</Label>
-                  <Input name="password" id="admin-signup-password" type="password" placeholder="Min 6 characters" value={form.password} onChange={handleChange} />
+                  <div className="relative">
+                    <Input name="password" id="admin-signup-password" type={showPassword ? "text" : "password"} placeholder="Min 6 characters" value={form.password} onChange={handleChange} className="pr-10" />
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin-signup-confirm-password">Confirm Password *</Label>
-                  <Input name="confirmPassword" id="admin-signup-confirm-password" type="password" placeholder="Re-enter password" value={form.confirmPassword} onChange={handleChange} />
+                  <div className="relative">
+                    <Input name="confirmPassword" id="admin-signup-confirm-password" type={showConfirmPassword ? "text" : "password"} placeholder="Re-enter password" value={form.confirmPassword} onChange={handleChange} className="pr-10" />
+                    <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <Button onClick={handleStep1} className="w-full mt-4 h-11 gap-2 bg-indigo-600 hover:bg-indigo-700">
                   Next Step <ArrowRight className="w-4 h-4" />
