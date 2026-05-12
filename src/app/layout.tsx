@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AUSHostel — Smart Hostel Management System",
+  title: "Assam University — Smart Hostel Management System",
   description: "Industry-grade hostel management system with 12 hostel silos, leave management, smart room allocation, and real-time notifications.",
   keywords: ["hostel", "management", "university", "student", "admin", "room allocation"],
 };

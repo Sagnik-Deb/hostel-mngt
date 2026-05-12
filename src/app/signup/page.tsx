@@ -168,7 +168,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-primary shadow-sm">H</div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">AUSHostel</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground">Assam University</span>
           </Link>
           <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Create Account</h1>
           <p className="text-sm text-muted-foreground">Register for hostel accommodation</p>
@@ -180,10 +180,10 @@ export default function SignupPage() {
             <div key={i} className="flex-1 text-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold transition-colors ${step > i + 1
-                    ? "bg-emerald-500 text-white"
-                    : step === i + 1
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-muted text-muted-foreground"
+                  ? "bg-emerald-500 text-white"
+                  : step === i + 1
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground"
                   }`}
               >
                 {step > i + 1 ? <Check className="w-4 h-4" /> : i + 1}
@@ -256,15 +256,13 @@ export default function SignupPage() {
                         key={type}
                         type="button"
                         onClick={() => setForm({ ...form, studentType: type })}
-                        className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all ${
-                          form.studentType === type
+                        className={`flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all ${form.studentType === type
                             ? "border-primary bg-primary/5 text-primary shadow-sm"
                             : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
+                          }`}
                       >
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                          form.studentType === type ? "border-primary bg-primary text-white" : "border-muted-foreground"
-                        }`}>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border-2 ${form.studentType === type ? "border-primary bg-primary text-white" : "border-muted-foreground"
+                          }`}>
                           {type === "PERMANENT" ? "P" : "G"}
                         </span>
                         {type === "PERMANENT" ? "Permanent" : "Guest"}

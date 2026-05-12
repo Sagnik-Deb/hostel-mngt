@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, GraduationCap, ShieldAlert, Crown } from "lucide-react";
+import { Loader2, GraduationCap, ShieldAlert, Crown, Eye, EyeOff } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -26,6 +26,7 @@ export default function LoginPage() {
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetch("/api/hostels")
@@ -59,7 +60,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-primary shadow-sm">H</div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">AUSHostel</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground">Assam University</span>
           </Link>
           <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>
@@ -94,7 +95,12 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="student-password">Password</Label>
-                    <Input id="student-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <div className="relative">
+                      <Input id="student-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
+                      <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="student-hostel">Select Hostel</Label>
@@ -137,11 +143,16 @@ export default function LoginPage() {
                   )}
                   <div className="space-y-2">
                     <Label htmlFor="admin-email">Email</Label>
-                    <Input id="admin-email" type="email" placeholder="admin@AUSHostel.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <Input id="admin-email" type="email" placeholder="admin@Assam University.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin-password">Password</Label>
-                    <Input id="admin-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <div className="relative">
+                      <Input id="admin-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
+                      <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">

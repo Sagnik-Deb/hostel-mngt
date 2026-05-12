@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ShieldAlert, Crown, ArrowLeft, Lock } from "lucide-react";
+import { Loader2, ShieldAlert, Crown, ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
 
 interface Hostel {
   id: string;
@@ -24,6 +24,7 @@ export default function SuperadminLoginPage() {
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetch("/api/hostels")
@@ -61,7 +62,7 @@ export default function SuperadminLoginPage() {
             </div>
             <div className="text-left">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                AUSHostel
+                Assam University
               </p>
               <p className="text-xl font-bold tracking-tight text-foreground">Super Admin Portal</p>
             </div>
@@ -108,14 +109,20 @@ export default function SuperadminLoginPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="superadmin-password">Password</Label>
-                <Input
-                  id="superadmin-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="superadmin-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="pr-10"
+                  />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -159,7 +166,7 @@ export default function SuperadminLoginPage() {
             <ArrowLeft className="w-4 h-4" /> Back to regular login
           </Link>
           <Link href="/login/superadmin/create-hostel" className="text-sm font-medium text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 transition-colors">
-             Create New Hostel
+            Create New Hostel
           </Link>
         </div>
       </div>

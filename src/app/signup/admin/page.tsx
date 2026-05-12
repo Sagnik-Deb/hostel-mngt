@@ -132,7 +132,7 @@ export default function AdminSignupPage() {
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">AUSHostel Admin</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground">Assam University Admin</span>
           </Link>
           <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Admin Registration</h1>
           <p className="text-sm text-muted-foreground">Register to manage a hostel — subject to approval</p>
@@ -144,10 +144,10 @@ export default function AdminSignupPage() {
             <div key={i} className="flex-1 text-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold transition-colors ${step > i + 1
-                    ? "bg-emerald-500 text-white"
-                    : step === i + 1
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "bg-muted text-muted-foreground"
+                  ? "bg-emerald-500 text-white"
+                  : step === i + 1
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "bg-muted text-muted-foreground"
                   }`}
               >
                 {step > i + 1 ? <Check className="w-4 h-4" /> : i + 1}

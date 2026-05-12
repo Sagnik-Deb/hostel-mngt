@@ -123,7 +123,7 @@ export default function HostelOverviewPage() {
           </Link>
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="logo" className="w-8 h-8" />
-            <span className="font-bold text-foreground">AUSHostel</span>
+            <span className="font-bold text-foreground">Assam University</span>
           </div>
           <Link href="/signup"><Button size="sm">Apply Now <ArrowRight className="w-3 h-3 ml-1" /></Button></Link>
         </div>
@@ -214,11 +214,10 @@ export default function HostelOverviewPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                  activeTab === tab.key
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
+                  }`}
               >
                 {tab.icon}
                 {tab.label}

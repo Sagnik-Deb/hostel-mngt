@@ -47,7 +47,7 @@ export default function DashboardShell({ children, links, title }: DashboardShel
               H
             </div>
             <div>
-              <h1 className="text-base font-bold text-foreground">AUSHostel</h1>
+              <h1 className="text-base font-bold text-foreground">Assam University</h1>
               <p className="text-xs text-muted-foreground">{title}</p>
             </div>
           </Link>
@@ -63,8 +63,8 @@ export default function DashboardShell({ children, links, title }: DashboardShel
                 href={link.href}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors no-underline ${isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
               >
                 <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
@@ -80,8 +80,8 @@ export default function DashboardShell({ children, links, title }: DashboardShel
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${user?.role === "SUPER_ADMIN"
-                      ? "bg-gradient-to-br from-red-500 to-purple-600"
-                      : "bg-gradient-to-br from-indigo-500 to-purple-600"
+                    ? "bg-gradient-to-br from-red-500 to-purple-600"
+                    : "bg-gradient-to-br from-indigo-500 to-purple-600"
                     }`}
                 >
                   {user?.role === "SUPER_ADMIN" ? (
@@ -187,8 +187,8 @@ export default function DashboardShell({ children, links, title }: DashboardShel
                           <div className="flex items-start gap-2">
                             <Circle
                               className={`w-2 h-2 mt-1.5 shrink-0 ${n.read
-                                  ? "text-muted-foreground/30 fill-muted-foreground/30"
-                                  : "text-primary fill-primary"
+                                ? "text-muted-foreground/30 fill-muted-foreground/30"
+                                : "text-primary fill-primary"
                                 }`}
                             />
                             <div className="flex-1 min-w-0">
