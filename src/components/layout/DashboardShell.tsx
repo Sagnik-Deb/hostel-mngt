@@ -8,7 +8,7 @@ import { useNotifications } from "@/context/NotificationContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bell, LogOut, Menu, X, Crown, Circle, type LucideIcon } from "lucide-react";
+import { Bell, LogOut, Menu, X, Crown, Circle, User, Mail, Building2, BedDouble, Hash, ShieldCheck, type LucideIcon } from "lucide-react";
 
 interface SidebarLink {
   href: string;
@@ -28,6 +28,7 @@ export default function DashboardShell({ children, links, title }: DashboardShel
   const pathname = usePathname();
   const [showNotifs, setShowNotifs] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -77,12 +78,16 @@ export default function DashboardShell({ children, links, title }: DashboardShel
         <div className="px-4 pt-4">
           <Card className="border-border shadow-sm">
             <CardContent className="p-3">
-              <div className="flex items-center gap-3 mb-3">
+              {/* Clickable user row */}
+              <button
+                className="flex items-center gap-3 mb-3 w-full text-left hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+                onClick={() => setShowProfile(true)}
+              >
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${user?.role === "SUPER_ADMIN"
                     ? "bg-gradient-to-br from-red-500 to-purple-600"
                     : "bg-gradient-to-br from-indigo-500 to-purple-600"
-                    }`}
+                  }`}
                 >
                   {user?.role === "SUPER_ADMIN" ? (
                     <Crown className="w-4 h-4" />
@@ -96,7 +101,7 @@ export default function DashboardShell({ children, links, title }: DashboardShel
                     {user?.role === "SUPER_ADMIN" ? "Super Admin" : user?.email}
                   </p>
                 </div>
-              </div>
+              </button>
               <Button variant="outline" size="sm" className="w-full gap-2 text-muted-foreground" onClick={logout}>
                 <LogOut className="w-4 h-4" /> Logout
               </Button>
@@ -104,6 +109,119 @@ export default function DashboardShell({ children, links, title }: DashboardShel
           </Card>
         </div>
       </aside>
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowProfile(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`px-6 pt-8 pb-6 text-center ${
+              user?.role === "SUPER_ADMIN"
+                ? "bg-gradient-to-br from-red-500 to-purple-600"
+                : "bg-gradient-to-br from-indigo-500 to-purple-600"
+            }`}>
+              <button
+                onClick={() => setShowProfile(false)}
+                className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3">
+                {user?.role === "SUPER_ADMIN" ? <Crown className="w-8 h-8" /> : user?.name?.charAt(0)?.toUpperCase()}
+              </div>
+              <h2 className="text-lg font-bold text-white">{user?.name}</h2>
+              <p className="text-white/80 text-sm mt-0.5">{user?.email}</p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-5 space-y-3">
+              {/* Role */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Role</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {user?.role === "SUPER_ADMIN" ? "Super Admin"
+                      : user?.role === "PRIMARY_ADMIN" ? "Primary Admin"
+                      : user?.role === "ADMIN" ? "Admin"
+                      : "Student"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                <Mail className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Email</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{user?.email}</p>
+                </div>
+              </div>
+
+              {/* Hostel */}
+              {(user?.hostel?.name || user?.hostelName) && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                  <Building2 className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Hostel</p>
+                    <p className="text-sm font-semibold text-foreground">{user?.hostel?.name || user?.hostelName}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Room */}
+              {user?.room && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                  <BedDouble className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Room</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Room {user.room.number} · Floor {user.room.floor} · {user.room.roomType}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Bed */}
+              {user?.bedNumber != null && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                  <Hash className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Bed Number</p>
+                    <p className="text-sm font-semibold text-foreground">{user.bedNumber}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Status */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                <User className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Status</p>
+                  <p className="text-sm font-semibold text-foreground capitalize">{user?.status?.toLowerCase().replace(/_/g, " ") || "—"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-5">
+              <Button
+                variant="destructive"
+                className="w-full gap-2"
+                onClick={() => { setShowProfile(false); logout(); }}
+              >
+                <LogOut className="w-4 h-4" /> Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 md:ml-[260px]">

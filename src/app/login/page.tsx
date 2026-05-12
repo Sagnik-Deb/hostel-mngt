@@ -94,7 +94,10 @@ export default function LoginPage() {
                     <Input id="student-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="student-password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="student-password">Password</Label>
+                      <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">Forgot password?</Link>
+                    </div>
                     <div className="relative">
                       <Input id="student-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
                       <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
@@ -146,7 +149,10 @@ export default function LoginPage() {
                     <Input id="admin-email" type="email" placeholder="admin@Assam University.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="admin-password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="admin-password">Password</Label>
+                      <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">Forgot password?</Link>
+                    </div>
                     <div className="relative">
                       <Input id="admin-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
                       <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>

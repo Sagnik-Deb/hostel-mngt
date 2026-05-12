@@ -212,6 +212,17 @@ model OTP {
   @@map("otps")
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
 model LeaveRequest {
   id             String      @id @default(cuid())
   userId         String
