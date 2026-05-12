@@ -54,8 +54,8 @@ export default function SignupPage() {
   };
 
   const handleStep1 = () => {
-    if (!form.name || !form.email || !form.password) {
-      setError("Name, email, and password are required");
+    if (!form.name || !form.email || !form.phone || !form.password) {
+      setError("Name, email, phone number, and password are required");
       return;
     }
     if (form.password.length < 6) {
@@ -95,6 +95,18 @@ export default function SignupPage() {
   const handleStep2 = async () => {
     if (!form.hostelId) {
       setError("Please select a hostel");
+      return;
+    }
+    if (!form.aadharNumber) {
+      setError("Aadhar Number is required");
+      return;
+    }
+    if (!form.collegeIdUpload) {
+      setError("College ID is required");
+      return;
+    }
+    if (!certFile) {
+      setError("Hostel Allotment Certificate is required");
       return;
     }
     setError("");
@@ -160,19 +172,30 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-20 right-10 w-72 h-72 rounded-full opacity-10 blur-3xl bg-blue-400"></div>
-      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full opacity-10 blur-3xl bg-primary"></div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background image */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('/auth-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      ></div>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]"></div>
 
       <div className="w-full max-w-lg relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-primary shadow-sm">H</div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">Assam University</span>
+            <div className="text-left">
+              <div className="text-2xl font-bold tracking-tight text-foreground leading-none">Assam University</div>
+              <div className="text-lg font-medium text-muted-foreground mt-1">Hostel Portal</div>
+            </div>
           </Link>
-          <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Create Account</h1>
+          <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Create your account</h1>
           <p className="text-sm text-muted-foreground">Register for hostel accommodation</p>
         </div>
 
@@ -217,8 +240,8 @@ export default function SignupPage() {
                   <Input name="email" id="signup-email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-phone">Phone</Label>
-                  <Input name="phone" id="signup-phone" placeholder="+91-XXXXXXXXXX" value={form.phone} onChange={handleChange} />
+                  <Label htmlFor="signup-phone">Phone *</Label>
+                  <Input name="phone" id="signup-phone" placeholder="+91-XXXXXXXXXX" value={form.phone} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password *</Label>
@@ -286,12 +309,12 @@ export default function SignupPage() {
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-aadhar">Aadhar Number</Label>
-                  <Input name="aadharNumber" id="signup-aadhar" placeholder="XXXX-XXXX-XXXX" value={form.aadharNumber} onChange={handleChange} />
+                  <Label htmlFor="signup-aadhar">Aadhar Number *</Label>
+                  <Input name="aadharNumber" id="signup-aadhar" placeholder="XXXX-XXXX-XXXX" value={form.aadharNumber} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-college-id">College ID</Label>
-                  <Input name="collegeIdUpload" id="signup-college-id" placeholder="College ID number" value={form.collegeIdUpload} onChange={handleChange} />
+                  <Label htmlFor="signup-college-id">College ID *</Label>
+                  <Input name="collegeIdUpload" id="signup-college-id" placeholder="College ID number" value={form.collegeIdUpload} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-roommate">Roommate Preference</Label>
@@ -309,7 +332,7 @@ export default function SignupPage() {
                 {/* Allotment Certificate Upload */}
                 <div className="space-y-2">
                   <Label className="flex items-baseline gap-2">
-                    Hostel Allotment Certificate
+                    Hostel Allotment Certificate *
                     <span className="text-xs font-normal text-muted-foreground">(JPG/PNG/PDF, max 5 MB)</span>
                   </Label>
                   <div

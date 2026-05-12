@@ -122,10 +122,18 @@ export default function AdminSignupPage() {
   const steps = ["Personal Info", "Select Hostel", "Verify Email", "Done"];
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-20 right-10 w-72 h-72 rounded-full opacity-10 blur-3xl bg-indigo-500"></div>
-      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full opacity-10 blur-3xl bg-purple-500"></div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background image */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('/auth-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      ></div>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]"></div>
 
       <div className="w-full max-w-lg relative z-10">
         {/* Header */}
