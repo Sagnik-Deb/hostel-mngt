@@ -68,7 +68,10 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl bg-primary shadow-sm">H</div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">Assam University</span>
+            <div className="text-left">
+              <div className="text-2xl font-bold tracking-tight text-foreground leading-none">Assam University</div>
+              <div className="text-lg font-medium text-muted-foreground mt-1">Hostel Portal</div>
+            </div>
           </Link>
           <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>
