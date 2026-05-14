@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
+import { notifyHostelAdmins } from "@/lib/notifications";
 
+// POST: Request checkout
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const { reason } = await request.json().catch(() => ({ reason: undefined }));
 
     const student = await prisma.user.findUnique({
       where: { id: user.userId },
-      include: { room: true },
     });
 
     if (!student) {
@@ -16,46 +18,96 @@ export async function POST(request: NextRequest) {
     }
 
     if (student.role !== "STUDENT") {
-      return NextResponse.json({ success: false, error: "Only student accounts can self-checkout" }, { status: 403 });
+      return NextResponse.json({ success: false, error: "Only student accounts can request checkout" }, { status: 403 });
     }
 
-    // 1. Archive to PastStudent
-    await prisma.pastStudent.create({
-      data: {
-        originalId: student.id,
-        email: student.email,
-        name: student.name,
-        phone: student.phone,
-        aadharNumber: student.aadharNumber,
-        collegeId: student.collegeId,
+    // Check if there's already a pending request
+    const existingRequest = await prisma.checkoutRequest.findUnique({
+      where: { userId: student.id },
+    });
+
+    if (existingRequest && existingRequest.status === "PENDING") {
+      return NextResponse.json({ success: false, error: "You already have a pending checkout request" }, { status: 400 });
+    }
+
+    // Upsert the checkout request
+    const checkoutRequest = await prisma.checkoutRequest.upsert({
+      where: { userId: student.id },
+      update: {
+        reason: reason || null,
+        status: "PENDING",
+      },
+      create: {
+        userId: student.id,
         hostelId: student.hostelId,
-        roomNumber: student.room?.number || null,
-        joinedAt: student.createdAt,
-        checkedOutBy: "SELF",
+        reason: reason || null,
+        status: "PENDING",
       },
     });
 
-    // 2. Free up room bed
-    if (student.roomId) {
-      await prisma.room.update({
-        where: { id: student.roomId },
-        data: { occupied: { decrement: 1 } },
-      });
-    }
+    // Notify admins
+    await notifyHostelAdmins(
+      student.hostelId,
+      "CHECKOUT_REQUEST_PENDING",
+      "Checkout Request",
+      `${student.name} has requested permanent checkout.`,
+      "/admin/checkout"
+    );
 
-    // 3. Permanently delete user from active records
-    // Related data (Notifications, Leaves, etc.) are handled by cascade delete in schema
-    await prisma.user.delete({
-      where: { id: student.id },
-    });
-
-    // The response will signal the client to clear auth state
     return NextResponse.json({
       success: true,
-      message: "You have been permanently checked out and your account has been removed. Thank you for your stay.",
+      message: "Checkout request submitted successfully. Awaiting admin approval.",
+      data: checkoutRequest,
     });
   } catch (error) {
-    console.error("Self-checkout error:", error);
+    console.error("Checkout request error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const status = errorMessage.includes("Unauthorized") ? 401 : 500;
+    return NextResponse.json({ success: false, error: errorMessage }, { status });
+  }
+}
+
+// GET: Check checkout request status
+export async function GET(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+
+    const checkoutRequest = await prisma.checkoutRequest.findUnique({
+      where: { userId: user.userId },
+    });
+
+    return NextResponse.json({ success: true, data: checkoutRequest });
+  } catch (error) {
+    console.error("Checkout check error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const status = errorMessage.includes("Unauthorized") ? 401 : 500;
+    return NextResponse.json({ success: false, error: errorMessage }, { status });
+  }
+}
+
+// DELETE: Cancel checkout request
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+
+    const existingRequest = await prisma.checkoutRequest.findUnique({
+      where: { userId: user.userId },
+    });
+
+    if (!existingRequest || existingRequest.status !== "PENDING") {
+      return NextResponse.json({ success: false, error: "No pending checkout request to cancel" }, { status: 400 });
+    }
+
+    await prisma.checkoutRequest.delete({
+      where: { id: existingRequest.id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Checkout request cancelled successfully.",
+    });
+  } catch (error) {
+    console.error("Checkout cancel error:", error);
     const errorMessage = error instanceof Error ? error.message : "Internal server error";
     const status = errorMessage.includes("Unauthorized") ? 401 : 500;
     return NextResponse.json({ success: false, error: errorMessage }, { status });

@@ -6,15 +6,16 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BedDouble, Plane, UtensilsCrossed, Bell, Speaker, LogOut } from "lucide-react";
+import { BedDouble, Plane, UtensilsCrossed, Bell, Speaker, LogOut, Clock } from "lucide-react";
 
 export default function StudentDashboard() {
-  const { user, token, logout } = useAuth();
+  const { user, token } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [leaveStatus, setLeaveStatus] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [checkoutRequest, setCheckoutRequest] = useState<any>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     if (!token) return;
     // Fetch active leave status
     fetch("/api/leaves", { headers: { Authorization: `Bearer ${token}` } })
@@ -34,39 +35,75 @@ export default function StudentDashboard() {
       .then((r) => r.json())
       .then((d) => { if (d.success) setUnreadCount(d.data.unreadCount); })
       .catch(console.error);
+      
+    // Fetch checkout request
+    fetch("/api/student/checkout", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setCheckoutRequest(d.data); })
+      .catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [token]);
 
-  const handleSelfCheckout = async () => {
-    const confirmed = confirm(
-      "⚠ PERMANENT CHECKOUT WARNING ⚠\n\n" +
-      "This action is IRREVERSIBLE. Your account will be deleted and you will be archived as a past student. " +
-      "You will NOT be able to log in again.\n\n" +
-      "Are you absolutely sure you want to proceed?"
-    );
-
-    if (!confirmed) return;
-
-    setIsCheckingOut(true);
-    try {
-      const resp = await fetch("/api/student/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+  const handleCheckoutAction = async () => {
+    if (checkoutRequest && checkoutRequest.status === "PENDING") {
+      const confirmed = confirm("Are you sure you want to cancel your checkout request?");
+      if (!confirmed) return;
+      
+      setIsCheckingOut(true);
+      try {
+        const resp = await fetch("/api/student/checkout", {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await resp.json();
+        if (data.success) {
+          alert(data.message);
+          setCheckoutRequest(null);
+        } else {
+          alert(data.error || "Failed to cancel request");
         }
-      });
-
-      const data = await resp.json();
-      if (data.success) {
-        alert(data.message);
-        logout();
-      } else {
-        alert(data.error || "Checkout failed");
+      } catch (err) {
+        alert("An error occurred");
+      } finally {
+        setIsCheckingOut(false);
       }
-    } catch (err) {
-      alert("An error occurred during checkout");
-    } finally {
-      setIsCheckingOut(false);
+    } else {
+      const confirmed = confirm(
+        "⚠ PERMANENT CHECKOUT WARNING ⚠\n\n" +
+        "You are requesting to permanently check out. If approved, your account will be deleted and archived.\n\n" +
+        "Are you sure you want to proceed?"
+      );
+
+      if (!confirmed) return;
+      
+      const reason = prompt("Optional: Please provide a reason for checking out:");
+      
+      setIsCheckingOut(true);
+      try {
+        const resp = await fetch("/api/student/checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await resp.json();
+        if (data.success) {
+          alert(data.message);
+          fetchData();
+        } else {
+          alert(data.error || "Checkout request failed");
+        }
+      } catch (err) {
+        alert("An error occurred during checkout request");
+      } finally {
+        setIsCheckingOut(false);
+      }
     }
   };
 
@@ -173,16 +210,40 @@ export default function StudentDashboard() {
                 <UtensilsCrossed className="w-4 h-4" /> Rate Meal
               </Button>
             </Link>
-            <Button 
-              variant="outline"
-              onClick={handleSelfCheckout}
-              disabled={isCheckingOut}
-              className="h-12 gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
-            >
-              <LogOut className="w-4 h-4" />
-              {isCheckingOut ? "Checking out..." : "Permanent Checkout"}
-            </Button>
+            {checkoutRequest?.status === "PENDING" ? (
+              <Button 
+                variant="outline"
+                onClick={handleCheckoutAction}
+                disabled={isCheckingOut}
+                className="h-12 gap-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 border-amber-200"
+              >
+                <Clock className="w-4 h-4" />
+                {isCheckingOut ? "Canceling..." : "Cancel Checkout Req"}
+              </Button>
+            ) : (
+              <Button 
+                variant="outline"
+                onClick={handleCheckoutAction}
+                disabled={isCheckingOut}
+                className="h-12 gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+              >
+                <LogOut className="w-4 h-4" />
+                {isCheckingOut ? "Requesting..." : "Request Checkout"}
+              </Button>
+            )}
           </div>
+          {checkoutRequest && checkoutRequest.status === "PENDING" && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800 flex items-center gap-2">
+              <Clock className="w-4 h-4 shrink-0" />
+              You have a pending permanent checkout request waiting for admin approval.
+            </div>
+          )}
+          {checkoutRequest && checkoutRequest.status === "REJECTED" && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800 flex items-center gap-2">
+              <Speaker className="w-4 h-4 shrink-0" />
+              Your previous checkout request was rejected. You can request again if needed.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

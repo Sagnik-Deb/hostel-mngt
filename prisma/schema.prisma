@@ -78,6 +78,9 @@ enum NotificationType {
   ADMIN_APPROVED
   ADMIN_REVOKED
   CHECKOUT_INITIATED
+  CHECKOUT_REQUEST_PENDING
+  CHECKOUT_REQUEST_APPROVED
+  CHECKOUT_REQUEST_REJECTED
   MESS_MENU_UPDATED
   GENERAL
 }
@@ -118,16 +121,17 @@ model Hostel {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  rooms           Room[]
-  users           User[]
-  applications    Application[]
-  complaints      Complaint[]
-  messMenus       MessMenu[]
-  pastStudents    PastStudent[]
-  galleryImages   HostelImage[]
-  administrations HostelAdministration[]
-  facilities      HostelFacility[]
-  achievements    HostelAchievement[]
+  rooms             Room[]
+  users             User[]
+  applications      Application[]
+  complaints        Complaint[]
+  messMenus         MessMenu[]
+  pastStudents      PastStudent[]
+  galleryImages     HostelImage[]
+  administrations   HostelAdministration[]
+  facilities        HostelFacility[]
+  achievements      HostelAchievement[]
+  checkoutRequests  CheckoutRequest[]
 
   @@map("hostels")
 }
@@ -169,12 +173,13 @@ model User {
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
-  hostel        Hostel         @relation(fields: [hostelId], references: [id])
-  room          Room?          @relation(fields: [roomId], references: [id])
-  leaveRequests LeaveRequest[]
-  notifications Notification[]
-  complaints    Complaint[]    @relation("complainant")
-  messRatings   MessRating[]
+  hostel           Hostel            @relation(fields: [hostelId], references: [id])
+  room             Room?             @relation(fields: [roomId], references: [id])
+  leaveRequests    LeaveRequest[]
+  notifications    Notification[]
+  complaints       Complaint[]       @relation("complainant")
+  messRatings      MessRating[]
+  checkoutRequest  CheckoutRequest?
 
   @@map("users")
 }
@@ -381,4 +386,19 @@ model HostelAchievement {
   hostel Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade)
 
   @@map("hostel_achievements")
+}
+
+model CheckoutRequest {
+  id        String   @id @default(cuid())
+  userId    String   @unique // only one active request per student
+  hostelId  String
+  reason    String?
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hostel Hostel @relation(fields: [hostelId], references: [id])
+
+  @@map("checkout_requests")
 }

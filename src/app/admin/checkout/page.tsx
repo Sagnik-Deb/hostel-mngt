@@ -7,16 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DoorOpen, LogOut, Building, Clock, UserCheck, History } from "lucide-react";
+import { DoorOpen, CheckCircle, XCircle, Building, Clock, History, AlertCircle } from "lucide-react";
 
-interface Student {
+interface PendingRequest {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
+  userId: string;
+  reason: string | null;
   status: string;
-  room: { number: string } | null;
   createdAt: string;
+  user: {
+    name: string;
+    email: string;
+    phone: string | null;
+    room: { number: string } | null;
+  };
 }
 
 interface PastStudent {
@@ -29,20 +33,20 @@ interface PastStudent {
 
 export default function CheckoutPage() {
   const { token } = useAuth();
-  const [students, setStudents] = useState<Student[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [pastStudents, setPastStudents] = useState<PastStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchData = () => {
     if (!token) return;
-    Promise.all([
-      fetch("/api/admin/students", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-      fetch("/api/admin/checkout", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-    ])
-      .then(([studentsData, pastData]) => {
-        if (studentsData.success) setStudents(studentsData.data);
-        if (pastData.success) setPastStudents(pastData.data);
+    fetch("/api/admin/checkout", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) {
+          setPendingRequests(data.data.pendingRequests || []);
+          setPastStudents(data.data.pastStudents || []);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -50,15 +54,19 @@ export default function CheckoutPage() {
 
   useEffect(() => { fetchData(); }, [token]);
 
-  const handleCheckout = async (studentId: string, name: string) => {
-    if (!confirm(`Permanently check out ${name}? This action CANNOT be undone. The student will lose all access.`)) return;
+  const handleAction = async (requestId: string, action: "approve" | "reject", name: string) => {
+    if (action === "approve") {
+      if (!confirm(`Approve permanent checkout for ${name}? This will DEACTIVATE their account and move them to past students. This CANNOT be undone.`)) return;
+    } else {
+      if (!confirm(`Reject checkout request for ${name}?`)) return;
+    }
 
-    setActionLoading(studentId);
+    setActionLoading(requestId);
     try {
       const res = await fetch("/api/admin/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ studentId }),
+        body: JSON.stringify({ requestId, action }),
       });
       const data = await res.json();
       if (data.success) fetchData();
@@ -82,17 +90,25 @@ export default function CheckoutPage() {
           <DoorOpen className="w-6 h-6 text-primary" /> Permanent Checkout
         </h1>
         <p className="text-sm text-muted-foreground">
-          Check out students who are permanently leaving the hostel
+          Manage permanent checkout requests from students
         </p>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="pending" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="active" className="gap-2"><UserCheck className="w-4 h-4" /> Active Students</TabsTrigger>
+          <TabsTrigger value="pending" className="gap-2 relative">
+            <AlertCircle className="w-4 h-4" /> 
+            Pending Requests
+            {pendingRequests.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[10px] text-white flex items-center justify-center rounded-full">
+                {pendingRequests.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="past" className="gap-2"><History className="w-4 h-4" /> Past Students</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="active">
+        <TabsContent value="pending">
           <Card className="border-border shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
@@ -100,57 +116,69 @@ export default function CheckoutPage() {
                   <TableRow>
                     <TableHead className="w-[300px]">Student</TableHead>
                     <TableHead>Room</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Requested</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((s) => (
-                    <TableRow key={s.id}>
+                  {pendingRequests.map((r) => (
+                    <TableRow key={r.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shrink-0">
-                            {s.name.charAt(0).toUpperCase()}
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-amber-500 to-orange-600 shadow-sm shrink-0">
+                            {r.user.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-sm text-foreground truncate">{s.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{s.email}</p>
+                            <p className="font-medium text-sm text-foreground truncate">{r.user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{r.user.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {s.room ? (
+                        {r.user.room ? (
                           <span className="flex items-center gap-1.5 text-foreground">
                             <Building className="w-3.5 h-3.5 text-muted-foreground" />
-                            {s.room.number}
+                            {r.user.room.number}
                           </span>
                         ) : (
                           <span className="text-muted-foreground italic text-xs">Unassigned</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={s.status === "ACTIVE" ? "default" : s.status === "ON_LEAVE" ? "secondary" : "destructive"} 
-                               className={s.status === "ACTIVE" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : ""}>
-                          {s.status.replace(/_/g, " ")}
-                        </Badge>
+                      <TableCell className="text-sm max-w-[200px] truncate" title={r.reason || ""}>
+                        {r.reason ? r.reason : <span className="text-muted-foreground italic text-xs">No reason provided</span>}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(r.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="gap-1.5"
-                          onClick={() => handleCheckout(s.id, s.name)}
-                          disabled={actionLoading === s.id}
-                        >
-                          {actionLoading === s.id ? "Processing..." : <><LogOut className="w-4 h-4" /> Checkout</>}
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => handleAction(r.id, "reject", r.user.name)}
+                            disabled={actionLoading === r.id}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" /> Reject
+                          </Button>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                            onClick={() => handleAction(r.id, "approve", r.user.name)}
+                            disabled={actionLoading === r.id}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {students.length === 0 && (
+                  {pendingRequests.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                        No active students found.
+                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                        No pending checkout requests.
                       </TableCell>
                     </TableRow>
                   )}
@@ -196,7 +224,7 @@ export default function CheckoutPage() {
                     </TableRow>
                   ))}
                   {pastStudents.length === 0 && (
-                    <TableRow>
+                     <TableRow>
                       <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                         No past students found.
                       </TableCell>

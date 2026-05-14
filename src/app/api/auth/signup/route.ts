@@ -35,10 +35,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { success: false, error: "An account with this email already exists" },
-        { status: 409 }
-      );
+      // If the user was permanently checked out, remove the stale record so they
+      // can re-register from scratch (their history is preserved in PastStudent).
+      if (existingUser.status === "CHECKED_OUT") {
+        await prisma.user.delete({ where: { email } });
+      } else {
+        return NextResponse.json(
+          { success: false, error: "An account with this email already exists" },
+          { status: 409 }
+        );
+      }
     }
 
     // Check if application already exists
