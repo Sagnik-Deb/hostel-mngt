@@ -91,14 +91,34 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ success: false, error: "Room is full" }, { status: 400 });
       }
 
-      await prisma.user.update({
-        where: { id: userId },
-        data: { roomId, bedNumber },
-      });
+      // Check user's current room
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+      }
 
-      await prisma.room.update({
-        where: { id: roomId },
-        data: { occupied: { increment: 1 } },
+      await prisma.$transaction(async (tx) => {
+        if (user.roomId && user.roomId !== roomId) {
+          // Decrement old room occupancy
+          await tx.room.update({
+            where: { id: user.roomId },
+            data: { occupied: { decrement: 1 } }
+          });
+        }
+
+        // Update user
+        await tx.user.update({
+          where: { id: userId },
+          data: { roomId, bedNumber },
+        });
+
+        if (user.roomId !== roomId) {
+          // Increment new room occupancy
+          await tx.room.update({
+            where: { id: roomId },
+            data: { occupied: { increment: 1 } },
+          });
+        }
       });
 
       return NextResponse.json({ success: true, message: "Student assigned to room" });

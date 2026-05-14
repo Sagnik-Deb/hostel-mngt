@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Users, Search, Building, Phone, Mail, FileText, CreditCard, DoorOpen, LogOut, ArrowRightCircle, Clock } from "lucide-react";
 import { formatFloorString } from "@/lib/utils";
 
@@ -33,9 +35,21 @@ export default function StudentsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assignRoomId, setAssignRoomId] = useState("");
+  const [assignBedNumber, setAssignBedNumber] = useState("1");
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     fetchStudents();
+    if (token) {
+      fetch("/api/rooms", { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => r.json())
+        .then((d) => { if (d.success) setRooms(d.data.filter((r: any) => r.occupied < r.capacity)); })
+        .catch(console.error);
+    }
   }, [token]);
 
   const fetchStudents = () => {
@@ -74,6 +88,42 @@ export default function StudentsPage() {
       alert("An error occurred");
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleAssignRoom = async () => {
+    if (!selectedStudent || !assignRoomId) return;
+    setAssigning(true);
+    try {
+      const res = await fetch("/api/rooms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "assign",
+          userId: selectedStudent.id,
+          roomId: assignRoomId,
+          bedNumber: parseInt(assignBedNumber, 10)
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Room assigned successfully!");
+        setIsAssignModalOpen(false);
+        fetchStudents();
+        const newRoom = rooms.find(r => r.id === assignRoomId);
+        if (newRoom) {
+           setSelectedStudent({
+             ...selectedStudent,
+             room: { number: newRoom.number, floor: newRoom.floor, roomType: newRoom.roomType }
+           });
+        }
+      } else {
+        alert(data.error || "Failed to assign room");
+      }
+    } catch (err) {
+      alert("Error assigning room");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -276,8 +326,11 @@ export default function StudentsPage() {
 
                 <div className="space-y-5">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                      <DoorOpen className="w-3.5 h-3.5" /> Room Details
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center justify-between gap-1.5">
+                      <span className="flex items-center gap-1.5"><DoorOpen className="w-3.5 h-3.5" /> Room Details</span>
+                      <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] bg-muted/50 hover:bg-muted" onClick={() => setIsAssignModalOpen(true)}>
+                        Change
+                      </Button>
                     </p>
                     {selectedStudent.room ? (
                       <div className="bg-muted/30 p-3 rounded-xl border border-border/50">
@@ -322,6 +375,52 @@ export default function StudentsPage() {
             </DialogFooter>
           </DialogContent>
         )}
+      </Dialog>
+
+      {/* Assign Room Modal */}
+      <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Assign Room to {selectedStudent?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Room</Label>
+              <Select value={assignRoomId} onValueChange={setAssignRoomId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a room" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rooms.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      Room {r.number} ({r.roomType}) - {r.capacity - r.occupied} beds available
+                    </SelectItem>
+                  ))}
+                  {rooms.length === 0 && (
+                    <SelectItem value="none" disabled>No rooms available</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            {assignRoomId && (
+              <div className="space-y-2">
+                <Label>Bed Number</Label>
+                <Input 
+                  type="number" 
+                  min={1} 
+                  value={assignBedNumber} 
+                  onChange={(e) => setAssignBedNumber(e.target.value)} 
+                />
+              </div>
+            )}
+            <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+              <Button variant="outline" onClick={() => setIsAssignModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleAssignRoom} disabled={!assignRoomId || assigning}>
+                {assigning ? "Assigning..." : "Assign Room"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
       </Dialog>
     </div>
   );
