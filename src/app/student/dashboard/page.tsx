@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BedDouble, Plane, UtensilsCrossed, Bell, Speaker, LogOut, Clock } from "lucide-react";
+import { BedDouble, Plane, UtensilsCrossed, Bell, Speaker, LogOut, Clock, Megaphone } from "lucide-react";
 
 export default function StudentDashboard() {
   const { user, token } = useAuth();
@@ -14,6 +14,7 @@ export default function StudentDashboard() {
   const [leaveStatus, setLeaveStatus] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [checkoutRequest, setCheckoutRequest] = useState<any>(null);
+  const [notices, setNotices] = useState<any[]>([]);
 
   const fetchData = () => {
     if (!token) return;
@@ -40,6 +41,12 @@ export default function StudentDashboard() {
     fetch("/api/student/checkout", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => { if (d.success) setCheckoutRequest(d.data); })
+      .catch(console.error);
+
+    // Fetch notices
+    fetch("/api/notices", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setNotices(d.data); })
       .catch(console.error);
   };
 
@@ -246,6 +253,42 @@ export default function StudentDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Notice Board */}
+      <div>
+        <h2 className="text-lg font-bold tracking-tight flex items-center gap-2 mb-4">
+          <Megaphone className="w-5 h-5 text-primary" /> Notice Board
+        </h2>
+        
+        {notices.length === 0 ? (
+          <Card className="border-dashed bg-muted/10">
+            <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <Megaphone className="w-10 h-10 mb-3 opacity-20" />
+              <p>No active notices right now.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {notices.map((n) => (
+              <Card key={n.id} className="shadow-sm border-border">
+                <CardContent className="p-5 flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-lg leading-none mb-1">{n.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {new Date(n.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+                    </p>
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">{n.message}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

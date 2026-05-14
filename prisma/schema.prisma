@@ -132,6 +132,7 @@ model Hostel {
   facilities        HostelFacility[]
   achievements      HostelAchievement[]
   checkoutRequests  CheckoutRequest[]
+  notices           Notice[]
 
   @@map("hostels")
 }
@@ -401,4 +402,16 @@ model CheckoutRequest {
   hostel Hostel @relation(fields: [hostelId], references: [id])
 
   @@map("checkout_requests")
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  hostelId  String
+  title     String
+  message   String
+  createdAt DateTime @default(now())
+
+  hostel Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  @@map("notices")
 }

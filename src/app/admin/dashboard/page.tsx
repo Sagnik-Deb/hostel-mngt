@@ -6,7 +6,11 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Building2, BedDouble, Plane, FileText, Clock, MessageSquareWarning, Shield, DoorOpen, Crown, LayoutDashboard, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Users, Building2, BedDouble, Plane, FileText, Clock, MessageSquareWarning, Shield, DoorOpen, Crown, LayoutDashboard, Megaphone, Trash2, Plus } from "lucide-react";
 
 interface Stats {
   totalStudents: number;
@@ -27,6 +31,19 @@ export default function AdminDashboard() {
   const [resignLoading, setResignLoading] = useState(false);
   const [showResignConfirm, setShowResignConfirm] = useState(false);
 
+  const [notices, setNotices] = useState<any[]>([]);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [noticeForm, setNoticeForm] = useState({ title: "", message: "" });
+  const [postingNotice, setPostingNotice] = useState(false);
+
+  const fetchNotices = () => {
+    if (!token) return;
+    fetch("/api/notices", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setNotices(d.data); })
+      .catch(console.error);
+  };
+
   useEffect(() => {
     if (!token) return;
     fetch("/api/admin/dashboard", { headers: { Authorization: `Bearer ${token}` } })
@@ -34,6 +51,8 @@ export default function AdminDashboard() {
       .then((d) => { if (d.success) setStats(d.data); })
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    fetchNotices();
   }, [token]);
 
   const handleSelfResign = async () => {
@@ -55,6 +74,45 @@ export default function AdminDashboard() {
     } finally {
       setResignLoading(false);
       setShowResignConfirm(false);
+    }
+  };
+
+  const handlePostNotice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPostingNotice(true);
+    try {
+      const res = await fetch("/api/notices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(noticeForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNoticeForm({ title: "", message: "" });
+        setIsNoticeModalOpen(false);
+        fetchNotices();
+      } else {
+        alert(data.error);
+      }
+    } catch {
+      alert("Error posting notice");
+    } finally {
+      setPostingNotice(false);
+    }
+  };
+
+  const handleDeleteNotice = async (id: string) => {
+    if (!confirm("Delete this notice?")) return;
+    try {
+      const res = await fetch(`/api/notices?id=${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) fetchNotices();
+      else alert(data.error);
+    } catch {
+      alert("Error deleting notice");
     }
   };
 
@@ -224,6 +282,92 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Notice Board */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-primary" /> Notice Board
+          </h2>
+          <Button size="sm" onClick={() => setIsNoticeModalOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Post Notice
+          </Button>
+        </div>
+        
+        {notices.length === 0 ? (
+          <Card className="border-dashed bg-muted/10">
+            <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <Megaphone className="w-10 h-10 mb-3 opacity-20" />
+              <p>No active notices. Post one to notify all students.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {notices.map((n) => (
+              <Card key={n.id} className="group hover:border-primary/30 transition-all shadow-sm">
+                <CardContent className="p-5 flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <h3 className="font-semibold text-foreground text-lg leading-none mb-1">{n.title}</h3>
+                      <button 
+                        className="text-muted-foreground hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                        onClick={() => handleDeleteNotice(n.id)}
+                        title="Delete notice"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {new Date(n.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+                    </p>
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">{n.message}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Post Notice Modal */}
+      <Dialog open={isNoticeModalOpen} onOpenChange={setIsNoticeModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Post Important Notice</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePostNotice} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input 
+                placeholder="e.g., Water Supply Interruption" 
+                value={noticeForm.title} 
+                onChange={e => setNoticeForm({...noticeForm, title: e.target.value})}
+                required 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea 
+                placeholder="Type the details here..." 
+                rows={4}
+                value={noticeForm.message} 
+                onChange={e => setNoticeForm({...noticeForm, message: e.target.value})}
+                required 
+              />
+            </div>
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsNoticeModalOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={postingNotice}>
+                {postingNotice ? "Posting..." : "Post Notice"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

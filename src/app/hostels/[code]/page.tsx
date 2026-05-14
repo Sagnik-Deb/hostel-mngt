@@ -22,6 +22,7 @@ import {
   UserCog,
   CalendarDays,
   Sparkles,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface HostelImage {
@@ -65,7 +66,7 @@ interface HostelData {
   achievements: Achievement[];
 }
 
-type Tab = "overview" | "administration" | "facilities" | "achievements";
+type Tab = "overview" | "gallery" | "administration" | "facilities" | "achievements";
 
 export default function HostelOverviewPage() {
   const params = useParams();
@@ -107,6 +108,7 @@ export default function HostelOverviewPage() {
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "overview", label: "Overview", icon: <Info className="w-4 h-4" /> },
+    { key: "gallery", label: "Gallery", icon: <ImageIcon className="w-4 h-4" /> },
     { key: "administration", label: "Administration", icon: <UserCog className="w-4 h-4" /> },
     { key: "facilities", label: "Facilities", icon: <Wifi className="w-4 h-4" /> },
     { key: "achievements", label: "Achievements", icon: <Award className="w-4 h-4" /> },
@@ -265,6 +267,48 @@ export default function HostelOverviewPage() {
                   ))}
                 </ul>
               </section>
+            )}
+          </div>
+        )}
+
+        {/* ─── GALLERY ─── */}
+        {activeTab === "gallery" && (
+          <div className="animate-in fade-in duration-300">
+            <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-2">
+              <ImageIcon className="w-6 h-6 text-primary" /> Photo Gallery
+            </h2>
+            {!hasGallery ? (
+              <div className="text-center py-20 text-muted-foreground">
+                <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p>No photos available in the gallery.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {hostel.galleryImages.map((img, index) => (
+                  <Card 
+                    key={img.id} 
+                    className="overflow-hidden hover:shadow-md transition-all border-border group cursor-pointer" 
+                    onClick={() => {
+                      setGalleryIndex(index);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    <div className="aspect-[4/3] relative overflow-hidden bg-blue-50">
+                      <Image
+                        src={img.url}
+                        alt={img.caption || hostel.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    {img.caption && (
+                      <CardContent className="p-4 bg-card">
+                        <p className="text-sm font-medium text-foreground text-center truncate">{img.caption}</p>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
         )}
