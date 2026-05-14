@@ -397,6 +397,7 @@ export default function RoomsPage() {
       <Dialog open={isStudentModalOpen} onOpenChange={setIsStudentModalOpen}>
         {selectedStudent && (
           <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden" style={{ zIndex: 110 }}>
+            <DialogTitle className="sr-only">{selectedStudent.name}&apos;s Profile</DialogTitle>
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 pb-8 border-b border-border">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white font-bold text-3xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md shrink-0 overflow-hidden">
