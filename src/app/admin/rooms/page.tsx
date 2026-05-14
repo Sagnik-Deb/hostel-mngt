@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Plus, Trash2, Users, Phone, CreditCard, FileText, DoorOpen, LogOut, ArrowRightCircle, Clock, Mail } from "lucide-react";
+import { formatFloorString } from "@/lib/utils";
 
 interface Occupant {
   id: string;
@@ -27,7 +28,7 @@ interface Occupant {
 interface Room {
   id: string;
   number: string;
-  floor: number;
+  floor: string;
   capacity: number;
   occupied: number;
   roomType: string;
@@ -39,7 +40,7 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [filterFloor, setFilterFloor] = useState<number | "all">("all");
+  const [filterFloor, setFilterFloor] = useState<string | "all">("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newRoom, setNewRoom] = useState({
@@ -153,8 +154,8 @@ export default function RoomsPage() {
     }
   };
 
-  const floors = [...new Set(rooms.map((r) => r.floor))].sort();
-  const filteredRooms = filterFloor === "all" ? rooms : rooms.filter((r) => r.floor === filterFloor);
+  const floors = [...new Set(rooms.map((r) => formatFloorString(r.floor)))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const filteredRooms = filterFloor === "all" ? rooms : rooms.filter((r) => formatFloorString(r.floor) === filterFloor);
 
   const getRoomColor = (room: Room) => {
     if (room.occupied >= room.capacity) return "bg-red-50 hover:bg-red-100 border-red-200 text-red-900";
@@ -192,16 +193,16 @@ export default function RoomsPage() {
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500"></span> Full</span>
           </div>
           <Select 
-            value={filterFloor === "all" ? "all" : filterFloor.toString()} 
-            onValueChange={(v) => setFilterFloor(v === "all" ? "all" : Number(v))}
+            value={filterFloor} 
+            onValueChange={(v) => setFilterFloor(v)}
           >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="All Floors" />
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="All Floors/Blocks" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Floors</SelectItem>
+              <SelectItem value="all">All Floors/Blocks</SelectItem>
               {floors.map((f) => (
-                <SelectItem key={f} value={f.toString()}>Floor {f}</SelectItem>
+                <SelectItem key={f} value={f}>{f}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -216,12 +217,12 @@ export default function RoomsPage() {
         {floors.filter((f) => filterFloor === "all" || f === filterFloor).map((floor) => (
           <Card key={floor} className="border-border shadow-sm">
             <CardHeader className="pb-4 bg-muted/30 border-b border-border">
-              <CardTitle className="text-lg text-muted-foreground">Floor {floor}</CardTitle>
+              <CardTitle className="text-lg text-muted-foreground">{floor}</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
                 {filteredRooms
-                  .filter((r) => r.floor === floor)
+                  .filter((r) => formatFloorString(r.floor) === floor)
                   .map((room) => (
                     <button
                       key={room.id}
@@ -251,7 +252,7 @@ export default function RoomsPage() {
                 <div>
                   <DialogTitle className="text-2xl font-bold">Room {selectedRoom.number}</DialogTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Floor {selectedRoom.floor} • {selectedRoom.roomType}
+                    {formatFloorString(selectedRoom.floor)} • {selectedRoom.roomType}
                   </p>
                 </div>
                 <Button 
@@ -350,11 +351,10 @@ export default function RoomsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Floor</Label>
+              <Label>Floor/Block</Label>
               <Input 
-                type="number" 
-                placeholder="e.g., 1"
-                min="1"
+                type="text" 
+                placeholder="e.g., 1 or Block A"
                 value={newRoom.floor}
                 onChange={(e) => setNewRoom({...newRoom, floor: e.target.value})}
                 required
@@ -447,7 +447,7 @@ export default function RoomsPage() {
                     {selectedRoom ? (
                       <div className="bg-muted/30 p-3 rounded-xl border border-border/50">
                         <p className="font-semibold text-sm text-foreground">Room {selectedRoom.number}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Floor {selectedRoom.floor} • {selectedRoom.roomType}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatFloorString(selectedRoom.floor)} • {selectedRoom.roomType}</p>
                         <p className="text-[10px] font-medium mt-1.5 text-primary">Bed Number: {selectedStudent.bedNumber}</p>
                       </div>
                     ) : (

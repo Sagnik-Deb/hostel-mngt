@@ -139,7 +139,7 @@ model Hostel {
 model Room {
   id        String   @id @default(cuid())
   number    String
-  floor     Int
+  floor     String
   capacity  Int      @default(3)
   occupied  Int      @default(0)
   roomType  String   @default("Triple Sharing")

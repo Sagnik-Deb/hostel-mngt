@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BedDouble, Building, Home, Hash, ArrowUpToLine, Key } from "lucide-react";
+import { formatFloorString } from "@/lib/utils";
 
 export default function MyRoomPage() {
   const { user } = useAuth();
@@ -35,9 +36,9 @@ export default function MyRoomPage() {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border/50">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <ArrowUpToLine className="w-4 h-4" /> Floor
+                    <ArrowUpToLine className="w-4 h-4" /> Level
                   </span>
-                  <span className="font-semibold text-foreground">{user.room.floor}</span>
+                  <span className="font-semibold text-foreground">{formatFloorString(user.room.floor)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border/50">
                   <span className="text-muted-foreground flex items-center gap-2">

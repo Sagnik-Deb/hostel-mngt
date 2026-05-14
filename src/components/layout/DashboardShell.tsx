@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bell, LogOut, Menu, X, Crown, Circle, User, Mail, Building2, BedDouble, Hash, ShieldCheck, type LucideIcon } from "lucide-react";
+import { formatFloorString } from "@/lib/utils";
 
 interface SidebarLink {
   href: string;
@@ -182,7 +183,7 @@ export default function DashboardShell({ children, links, title }: DashboardShel
                   <div>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Room</p>
                     <p className="text-sm font-semibold text-foreground">
-                      Room {user.room.number} · Floor {user.room.floor} · {user.room.roomType}
+                      Room {user.room.number} &middot; {formatFloorString(user.room.floor)} &middot; {user.room.roomType}
                     </p>
                   </div>
                 </div>

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const admin = requireAdmin(request);
     const { number, floor, capacity, roomType } = await request.json();
 
-    if (!number || floor === undefined || !capacity || !roomType) {
+    if (!number || !floor || !capacity || !roomType) {
       return NextResponse.json({ success: false, error: "All fields are required" }, { status: 400 });
     }
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const room = await prisma.room.create({
       data: {
         number,
-        floor: Number(floor),
+        floor: String(floor),
         capacity: Number(capacity),
         roomType,
         hostelId: admin.hostelId,

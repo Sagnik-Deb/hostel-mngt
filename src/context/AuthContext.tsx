@@ -13,7 +13,7 @@ interface User {
   hostelName?: string;
   hostelCode?: string;
   hostel?: { id: string; name: string; code: string };
-  room?: { id: string; number: string; floor: number; roomType: string } | null;
+  room?: { id: string; number: string; floor: string; roomType: string } | null;
   bedNumber?: number | null;
   profileImage?: string | null;
   adminState?: string;

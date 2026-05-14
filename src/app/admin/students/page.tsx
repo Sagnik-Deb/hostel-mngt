@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Users, Search, Building, Phone, Mail, FileText, CreditCard, DoorOpen, LogOut, ArrowRightCircle, Clock } from "lucide-react";
+import { formatFloorString } from "@/lib/utils";
 
 interface Student {
   id: string;
@@ -20,7 +21,7 @@ interface Student {
   aadharNumber: string | null;
   collegeId: string | null;
   profileImage: string | null;
-  room: { number: string; floor: number; roomType: string } | null;
+  room: { number: string; floor: string; roomType: string } | null;
   createdAt: string;
 }
 
@@ -281,7 +282,7 @@ export default function StudentsPage() {
                     {selectedStudent.room ? (
                       <div className="bg-muted/30 p-3 rounded-xl border border-border/50">
                         <p className="font-semibold text-sm text-foreground">Room {selectedStudent.room.number}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Floor {selectedStudent.room.floor} • {selectedStudent.room.roomType}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatFloorString(selectedStudent.room.floor)} • {selectedStudent.room.roomType}</p>
                       </div>
                     ) : (
                       <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Unassigned</Badge>
