@@ -65,7 +65,7 @@ async function main() {
         await prisma.room.create({
           data: {
             number: roomNumber,
-            floor,
+            floor: floor.toString(),
             capacity,
             roomType,
             hostelId: hostel.id,
