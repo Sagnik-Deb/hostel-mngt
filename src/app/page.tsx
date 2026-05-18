@@ -158,7 +158,7 @@ export default function HomePage() {
       {/* Hostels Grid */}
       <section id="hostels" className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">Our 12 Hostels</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">Our Hostels</h2>
           <p className="text-muted-foreground">Browse details, wardens, and rules for each hostel</p>
         </div>
 
