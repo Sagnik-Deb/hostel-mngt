@@ -156,8 +156,9 @@ export default function HomePage() {
 
 
       {/* Hostels Grid */}
+      {/* Hostels Grid */}
       <section id="hostels" className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">Our Hostels</h2>
           <p className="text-muted-foreground">Browse details, wardens, and rules for each hostel</p>
         </div>
@@ -167,34 +168,84 @@ export default function HomePage() {
             <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin border-primary"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {hostels.map((hostel, i) => (
-              <Link
-                key={hostel.id}
-                href={`/hostels/${hostel.code.toLowerCase()}`}
-                className="block group"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                <Card className="overflow-hidden h-full hover:shadow-md hover:border-primary/40 transition-all border-border">
-                  <div className="aspect-video w-full flex items-center justify-center bg-blue-50/50 border-b border-border/50 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                    <Home className="w-12 h-12 text-blue-500 relative z-10 opacity-50" />
-                  </div>
-                  <CardContent className="p-5">
-                    <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
-                    <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
-                        <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.capacity}
-                      </span>
-                      <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border-none gap-1">
-                        View <ArrowRight className="w-3 h-3" />
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="space-y-16">
+            {/* Boys Hostels Section */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 border-b pb-3 border-blue-100">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold">B</div>
+                <h3 className="text-2xl font-bold text-blue-900 tracking-tight">Boys Hostels</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {hostels
+                  .filter((hostel) => hostel.name.startsWith("BOYS-HOSTEL"))
+                  .map((hostel, i) => (
+                    <Link
+                      key={hostel.id}
+                      href={`/hostels/${hostel.code.toLowerCase()}`}
+                      className="block group"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                      <Card className="overflow-hidden h-full hover:shadow-md hover:border-blue-400/40 transition-all border-border">
+                        <div className="aspect-video w-full flex items-center justify-center bg-blue-50/50 border-b border-border/50 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                          <Home className="w-12 h-12 text-blue-500 relative z-10 opacity-50" />
+                        </div>
+                        <CardContent className="p-5">
+                          <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
+                          <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                              <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.capacity}
+                            </span>
+                            <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border-none gap-1">
+                              View <ArrowRight className="w-3 h-3" />
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+              </div>
+            </div>
+
+            {/* Girls Hostels Section */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 border-b pb-3 border-rose-100">
+                <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 font-bold">G</div>
+                <h3 className="text-2xl font-bold text-rose-900 tracking-tight">Girls Hostels</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {hostels
+                  .filter((hostel) => !hostel.name.startsWith("BOYS-HOSTEL"))
+                  .map((hostel, i) => (
+                    <Link
+                      key={hostel.id}
+                      href={`/hostels/${hostel.code.toLowerCase()}`}
+                      className="block group"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                      <Card className="overflow-hidden h-full hover:shadow-md hover:border-rose-400/40 transition-all border-border">
+                        <div className="aspect-video w-full flex items-center justify-center bg-rose-50/50 border-b border-border/50 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-[url('/images/gallery/hostel-building.png')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                          <Home className="w-12 h-12 text-rose-500 relative z-10 opacity-50" />
+                        </div>
+                        <CardContent className="p-5">
+                          <h3 className="font-semibold text-lg mb-1 tracking-tight text-foreground">{hostel.name}</h3>
+                          <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                              <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.capacity}
+                            </span>
+                            <Badge variant="secondary" className="font-medium bg-rose-50 text-rose-700 hover:bg-rose-100 border-none gap-1">
+                              View <ArrowRight className="w-3 h-3" />
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+              </div>
+            </div>
           </div>
         )}
       </section>

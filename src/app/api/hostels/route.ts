@@ -25,24 +25,26 @@ export async function GET() {
       orderBy: { name: "asc" },
     });
 
-    const data = hostels.map((h) => {
-      const activeAdminNames = h.users.map((u) => u.name).join(", ");
-      return {
-        id: h.id,
-        name: h.name,
-        code: h.code,
-        description: h.description,
-        wardenName: activeAdminNames || "No Active Admins",
-        wardenEmail: h.wardenEmail,
-        wardenPhone: h.wardenPhone,
-        address: h.address,
-        rules: h.rules,
-        imageUrl: h.imageUrl,
-        totalRooms: h.totalRooms || h._count.rooms,
-        capacity: h.capacity,
-        currentOccupancy: h._count.users,
-      };
-    });
+    const data = hostels
+      .filter((h) => h.name !== "BOYS-HOSTEL 6" && h.name !== "Test" && h.name !== "a")
+      .map((h) => {
+        const activeAdminNames = h.users.map((u) => u.name).join(", ");
+        return {
+          id: h.id,
+          name: h.name,
+          code: h.code,
+          description: h.description,
+          wardenName: activeAdminNames || "No Active Admins",
+          wardenEmail: h.wardenEmail,
+          wardenPhone: h.wardenPhone,
+          address: h.address,
+          rules: h.rules,
+          imageUrl: h.imageUrl,
+          totalRooms: h.totalRooms || h._count.rooms,
+          capacity: h.capacity,
+          currentOccupancy: h._count.users,
+        };
+      });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

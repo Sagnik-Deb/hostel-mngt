@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Loader2, ShieldAlert, Crown, ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
 
 interface Hostel {
@@ -140,11 +140,27 @@ export default function SuperadminLoginPage() {
                     <SelectValue placeholder="— Choose a hostel —" />
                   </SelectTrigger>
                   <SelectContent>
-                    {hostels.map((h) => (
-                      <SelectItem key={h.id} value={h.id}>
-                        {h.name} ({h.code})
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel className="font-bold text-blue-600">Boys Hostels</SelectLabel>
+                      {hostels
+                        .filter((h) => h.name.startsWith("BOYS-HOSTEL"))
+                        .map((h) => (
+                          <SelectItem key={h.id} value={h.id}>
+                            {h.name} ({h.code})
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel className="font-bold text-rose-600">Girls Hostels</SelectLabel>
+                      {hostels
+                        .filter((h) => !h.name.startsWith("BOYS-HOSTEL"))
+                        .map((h) => (
+                          <SelectItem key={h.id} value={h.id}>
+                            {h.name} ({h.code})
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">

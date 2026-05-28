@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Loader2, GraduationCap, ShieldAlert, Crown, Eye, EyeOff } from "lucide-react";
 
 interface Hostel {
@@ -123,9 +123,23 @@ export default function LoginPage() {
                         <SelectValue placeholder="Select your hostel" />
                       </SelectTrigger>
                       <SelectContent>
-                        {hostels.map((h) => (
-                          <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
-                        ))}
+                        <SelectGroup>
+                          <SelectLabel className="font-bold text-blue-600">Boys Hostels</SelectLabel>
+                          {hostels
+                            .filter((h) => h.name.startsWith("BOYS-HOSTEL"))
+                            .map((h) => (
+                              <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                            ))}
+                        </SelectGroup>
+                        <SelectSeparator />
+                        <SelectGroup>
+                          <SelectLabel className="font-bold text-rose-600">Girls Hostels</SelectLabel>
+                          {hostels
+                            .filter((h) => !h.name.startsWith("BOYS-HOSTEL"))
+                            .map((h) => (
+                              <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                            ))}
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   </div>

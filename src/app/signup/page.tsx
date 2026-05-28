@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Check, UploadCloud, FileText, X, Mail, CheckCircle2, ArrowRight, ArrowLeft, Building2, Eye, EyeOff } from "lucide-react";
 
@@ -277,9 +277,23 @@ export default function SignupPage() {
                       <SelectValue placeholder="Choose your hostel" />
                     </SelectTrigger>
                     <SelectContent>
-                      {hostels.map((h) => (
-                        <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
-                      ))}
+                      <SelectGroup>
+                        <SelectLabel className="font-bold text-blue-600">Boys Hostels</SelectLabel>
+                        {hostels
+                          .filter((h) => h.name.startsWith("BOYS-HOSTEL"))
+                          .map((h) => (
+                            <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                          ))}
+                      </SelectGroup>
+                      <SelectSeparator />
+                      <SelectGroup>
+                        <SelectLabel className="font-bold text-rose-600">Girls Hostels</SelectLabel>
+                        {hostels
+                          .filter((h) => !h.name.startsWith("BOYS-HOSTEL"))
+                          .map((h) => (
+                            <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                          ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
