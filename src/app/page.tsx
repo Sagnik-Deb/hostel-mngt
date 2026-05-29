@@ -262,7 +262,7 @@ export default function HomePage() {
                           <p className="text-xs mb-4 text-muted-foreground line-clamp-2 leading-relaxed">{hostel.description}</p>
                           <div className="flex items-center justify-between text-xs">
                             <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
-                              <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.capacity}
+                              <Users className="w-3.5 h-3.5" /> {hostel.currentOccupancy}/{hostel.bedOccupancy}
                             </span>
                             <Badge variant="secondary" className="font-medium bg-rose-50 text-rose-700 hover:bg-rose-100 border-none gap-1">
                               View <ArrowRight className="w-3 h-3" />
