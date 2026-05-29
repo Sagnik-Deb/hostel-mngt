@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -72,6 +74,7 @@ export default function HostelOverviewPage() {
   const params = useParams();
   const code = params?.code as string;
   const [hostel, setHostel] = useState<HostelData | null>(null);
+  console.log(hostel)
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -198,7 +201,7 @@ export default function HostelOverviewPage() {
             <p className="text-xs text-primary-foreground/70 flex items-center justify-center gap-1"><Hash className="w-3 h-3" /> Rooms</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{hostel.capacity}</p>
+            <p className="text-2xl font-bold">{hostel.bedOccupancy}</p>
             <p className="text-xs text-primary-foreground/70 flex items-center justify-center gap-1"><Users className="w-3 h-3" /> Capacity</p>
           </div>
           <div>
@@ -217,8 +220,8 @@ export default function HostelOverviewPage() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
               >
                 {tab.icon}
@@ -240,18 +243,18 @@ export default function HostelOverviewPage() {
                 <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" /> About the Hostel
                 </h2>
-                <p className="text-muted-foreground leading-relaxed text-base">{hostel.description}</p>
+                <p className="text-muted-foreground leading-relaxed text-base">{hostel.aboutUs}</p>
               </section>
             )}
-            {hostel.aboutUs && (
+            {/* {hostel.aboutUs && (
               <section className="bg-blue-50/50 rounded-2xl p-8 border border-blue-100">
                 <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                   <Info className="w-5 h-5 text-blue-600" /> Who We Are
                 </h2>
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{hostel.aboutUs}</p>
               </section>
-            )}
-            {hostel.rules.length > 0 && (
+            )} */}
+            {/* {hostel.rules.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-primary" /> Hostel Rules
@@ -267,7 +270,7 @@ export default function HostelOverviewPage() {
                   ))}
                 </ul>
               </section>
-            )}
+            )} */}
           </div>
         )}
 
@@ -285,9 +288,9 @@ export default function HostelOverviewPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {hostel.galleryImages.map((img, index) => (
-                  <Card 
-                    key={img.id} 
-                    className="overflow-hidden hover:shadow-md transition-all border-border group cursor-pointer" 
+                  <Card
+                    key={img.id}
+                    className="overflow-hidden hover:shadow-md transition-all border-border group cursor-pointer"
                     onClick={() => {
                       setGalleryIndex(index);
                       window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -12,6 +12,11 @@ export async function GET(
     const hostel = await prisma.hostel.findUnique({
       where: { code: code.toUpperCase() },
       include: {
+        rooms: {
+          select: {
+            capacity: true,
+          },
+        },
         galleryImages: { orderBy: { order: "asc" } },
         administrations: { orderBy: { order: "asc" } },
         facilities: { orderBy: { createdAt: "asc" } },
@@ -29,6 +34,8 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Hostel not found" }, { status: 404 });
     }
 
+    const bedOccupancy = hostel.rooms.reduce((sum, r) => sum + r.capacity, 0);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -39,13 +46,15 @@ export async function GET(
         aboutUs: hostel.aboutUs,
         address: hostel.address,
         rules: hostel.rules,
-        totalRooms: hostel.totalRooms || hostel._count.rooms,
+        totalRooms: hostel.rooms.length || hostel.totalRooms || hostel._count.rooms,
         capacity: hostel.capacity,
         currentOccupancy: hostel._count.users,
         galleryImages: hostel.galleryImages,
         administrations: hostel.administrations,
         facilities: hostel.facilities,
         achievements: hostel.achievements,
+        rooms: hostel.rooms,
+        bedOccupancy,
       },
     });
   } catch (error) {

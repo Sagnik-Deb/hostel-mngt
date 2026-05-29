@@ -5,6 +5,11 @@ export async function GET() {
   try {
     const hostels = await prisma.hostel.findMany({
       include: {
+        rooms: {
+          select: {
+            capacity: true,
+          },
+        },
         _count: {
           select: {
             users: { where: { role: "STUDENT", status: { in: ["ACTIVE", "ON_LEAVE"] } } },
@@ -29,6 +34,7 @@ export async function GET() {
       .filter((h) => h.name !== "BOYS-HOSTEL 6" && h.name !== "Test" && h.name !== "a")
       .map((h) => {
         const activeAdminNames = h.users.map((u) => u.name).join(", ");
+        const bedOccupancy = h.rooms.reduce((sum, r) => sum + r.capacity, 0);
         return {
           id: h.id,
           name: h.name,
@@ -40,9 +46,12 @@ export async function GET() {
           address: h.address,
           rules: h.rules,
           imageUrl: h.imageUrl,
+          totalOccupancy: h.capacity,
           totalRooms: h.totalRooms || h._count.rooms,
           capacity: h.capacity,
           currentOccupancy: h._count.users,
+          rooms: h.rooms,
+          bedOccupancy,
         };
       });
 
